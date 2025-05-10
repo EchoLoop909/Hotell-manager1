@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Room - Hotel Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Book a Room</h2>
+    <form>
+        <div class="mb-3">
+            <label for="customer" class="form-label">Customer Email</label>
+            <input type="email" class="form-control" id="customer" placeholder="Enter customer email" required>
+        </div>
+        <div class="mb-3">
+            <label for="room" class="form-label">Room</label>
+            <select class="form-select" id="room" required>
+                <option value="1">R101 - Standard</option>
+                <option value="2">R201 - Deluxe</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="checkIn" class="form-label">Check-in Date</label>
+                <input type="date" class="form-control" id="checkIn" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="checkOut" class="form-label">Check-out Date</label>
+                <input type="date" class="form-control" id="checkOut" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Additional Services</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="service1">
+                <label class="form-check-label" for="service1">Breakfast (100,000 VND)</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="service2">
+                <label class="form-check-label" for="service2">Laundry (50,000 VND)</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Book Now</button>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
