@@ -1,0 +1,29 @@
+package com.example.demo.model.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = "bookingServiceId")
+public class BookingService {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int bookingServiceId;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
+
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private Service service;
+
+    @Column(nullable = false)
+    private int quantity;
+}
