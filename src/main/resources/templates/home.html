@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Trang chủ</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; text-align: center; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h2>Chào mừng bạn đến với trang chủ!</h2>
-<p>Bạn đã đăng nhập thành công.</p>
-<a href="/logout">Đăng xuất</a>
+
+<!-- Gọi navbar từ fragment -->
+<th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+<!-- Nội dung chính -->
+<div class="container">
+    <h2>Chào mừng bạn đến với hệ thống quản lý khách sạn!</h2>
+    <p>Hệ thống giúp bạn quản lý đặt phòng, khách hàng và dịch vụ một cách dễ dàng và hiệu quả.</p>
+
+    <div style="margin-top: 30px;">
+        <a href="/bookings"><button>Quản lý đặt phòng</button></a>
+        <a href="/customers"><button>Quản lý khách hàng</button></a>
+        <a href="/services"><button>Dịch vụ khách sạn</button></a>
+    </div>
+</div>
+
 </body>
 </html>

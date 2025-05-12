@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- Gọi navbar từ fragment -->
+<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+<!-- Nội dung chính -->
+<div class="container">
+    <h2>Đăng ký tài khoản</h2>
+    <form id="register-form">
+        <label for="firstname">Tên:</label>
+        <input type="text" name="firstname" id="firstname" required />
+
+        <label for="lastname">Họ:</label>
+        <input type="text" name="lastname" id="lastname" required />
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required />
+
+        <label for="password">Mật khẩu:</label>
+        <input type="password" name="password" id="password" required />
+
+        <p id="error-message" class="error" style="color: red;"></p>
+
+        <button type="submit" id="submit-btn">Đăng ký</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("register-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const firstname = document.getElementById("firstname").value.trim();
+        const lastname = document.getElementById("lastname").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorMessage = document.getElementById("error-message");
+        const submitBtn = document.getElementById("submit-btn");
+
+        errorMessage.textContent = ""; // Xóa lỗi cũ
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Đang đăng ký...";
+
+        try {
+            const response = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstname,
+                    lastname,
+                    email,
+                    password
+                })
+            });
+
+            if (response.ok) {
+                // Chuyển hướng đến trang đăng nhập hoặc trang chủ
+                window.location.href = "/login";
+            } else {
+                const errorData = await response.json();
+                errorMessage.textContent = errorData.message || "Đăng ký thất bại. Vui lòng thử lại!";
+            }
+        } catch (error) {
+            errorMessage.textContent = "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Đăng ký";
+        }
+    });
+</script>
+
+</body>
+</html>

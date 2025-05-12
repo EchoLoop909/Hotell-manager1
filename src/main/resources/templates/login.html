@@ -1,52 +1,69 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Đăng nhập</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; }
-        .error { color: #7700ff; }
-        input, button { margin: 10px 0; padding: 8px; width: 100%; }
-        button { background-color: #007bff; color: white; border: none; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h2>Đăng nhập</h2>
-<form id="login-form">
-    <label>Tên đăng nhập:</label>
-    <input type="text" name="username" id="username" required/><br/>
-    <label>Mật khẩu:</label>
-    <input type="password" name="password" id="password" required/><br/>
-    <button type="submit">Đăng nhập</button>
-</form>
 
-<p id="error-message" class="error"></p>
+<!-- Gọi navbar fragment -->
+<th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+<!-- Nội dung chính -->
+<div class="container">
+    <h2>Đăng nhập</h2>
+    <form id="login-form">
+        <label for="email">Tên đăng nhập:</label>
+        <input type="text" name="email" id="email" required />
+
+        <label for="password">Mật khẩu:</label>
+        <input type="password" name="password" id="password" required />
+
+        <p id="error-message" class="error" style="color: red;"></p>
+
+        <button type="submit" id="submit-btn">Đăng nhập</button>
+    </form>
+</div>
 
 <script>
-    document.getElementById('login-form').addEventListener('submit', async function(event) {
+    document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorMessage = document.getElementById("error-message");
+        const submitBtn = document.getElementById("submit-btn");
+
+        errorMessage.textContent = ""; // Xóa lỗi cũ
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Đang đăng nhập...";
 
         try {
             const response = await fetch('/api/v1/auth/authenticate', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: username, password: password})
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }) // Sửa ở đây
             });
 
             if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem('accessToken', data.accessToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
-                window.location.href = '/home';
+                localStorage.setItem('accessToken', data.accessToken); // Lưu token
+                window.location.href = "/home"; // Chuyển hướng
             } else {
-                document.getElementById('error-message').innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+                const errorData = await response.json();
+                errorMessage.textContent = errorData.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại!";
             }
         } catch (error) {
-            document.getElementById('error-message').innerText = "Lỗi hệ thống!";
+            errorMessage.textContent = "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Đăng nhập";
         }
     });
 </script>
+
 </body>
 </html>

@@ -43,10 +43,12 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/home").permitAll()  // Cho phép truy cập công khai vào /home
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/login", "/", "/static/**", "/resources/**", "/api/v1/auth/**").permitAll() // Cho phép truy cập công khai
-                        .requestMatchers("/api/staff/**").authenticated()
-                        .requestMatchers("/api/custommer/**").authenticated()// Bắt buộc có JWT
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/api/v1/auth/**").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
