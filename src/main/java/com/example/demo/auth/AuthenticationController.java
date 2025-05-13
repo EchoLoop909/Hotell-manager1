@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,19 +32,59 @@ public class AuthenticationController {
 //    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
 //        return ResponseEntity.ok(authenticationService.register(request));
 //    }
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
-        try {
-            authenticationService.register(registerRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Đăng ký thành công");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đăng ký thất bại: " + e.getMessage());
+@PostMapping("/register")
+public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
+    try {
+        Optional<User> user = userRepository.findByEmail(registerRequest.getEmail());
+        if (user.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
         }
+
+        authenticationService.register(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Đăng ký thành công");
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đăng ký thất bại: " + e.getMessage());
     }
+}
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
+        try {
+            // Kiểm tra người dùng tồn tại theo email
+            var userOptional = userRepository.findByEmail(request.getEmail());
+            if (userOptional.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Email hoặc mật khẩu không đúng"));
+            }
+
+            var user = userOptional.get();
+
+            // Gửi vào service xác thực
+            AuthenticationResponse authResponse = authenticationService.authenticate(request);
+
+            if (authResponse == null || authResponse.getAccessToken() == null) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Email hoặc mật khẩu không đúng"));
+            }
+
+            // Tạo map trả về gồm access_token và user (chỉ chọn thông tin cần thiết)
+            Map<String, Object> response = new HashMap<>();
+            response.put("access_token", authResponse.getAccessToken());
+            response.put("user", Map.of(
+                    "firstname", user.getFirstname(),
+                    "lastname", user.getLastname(),
+                    "role", user.getRole().name() // Nếu role là enum
+            ));
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Đã xảy ra lỗi máy chủ: " + e.getMessage()));
+        }
     }
 
     @PostMapping("/refresh-token")

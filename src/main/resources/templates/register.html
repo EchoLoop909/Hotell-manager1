@@ -26,12 +26,15 @@
         <label for="password">Mật khẩu:</label>
         <input type="password" name="password" id="password" required />
 
+        <label for="repassword">Nhập lại mật khẩu:</label>
+        <input type="password" name="repassword" id="repassword" required />
+
         <p id="error-message" class="error" style="color: red;"></p>
+        <p id="success-message" class="success" style="color: green;"></p>
 
         <button type="submit" id="submit-btn">Đăng ký</button>
     </form>
 </div>
-
 <script>
     document.getElementById("register-form").addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -40,10 +43,21 @@
         const lastname = document.getElementById("lastname").value.trim();
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
+        const repassword = document.getElementById("repassword").value.trim();
+
         const errorMessage = document.getElementById("error-message");
+        const successMessage = document.getElementById("success-message");
         const submitBtn = document.getElementById("submit-btn");
 
-        errorMessage.textContent = ""; // Xóa lỗi cũ
+        // Clear previous messages
+        errorMessage.textContent = "";
+        successMessage.textContent = "";
+
+        if (password !== repassword) {
+            errorMessage.textContent = "Mật khẩu nhập lại không khớp.";
+            return;
+        }
+
         submitBtn.disabled = true;
         submitBtn.textContent = "Đang đăng ký...";
 
@@ -61,13 +75,22 @@
                 })
             });
 
+            const responseText = await response.text();
+
             if (response.ok) {
-                // Chuyển hướng đến trang đăng nhập hoặc trang chủ
-                window.location.href = "/login";
+                successMessage.textContent = "Đăng ký thành công!";
+                document.getElementById("register-form").reset();
             } else {
-                const errorData = await response.json();
-                errorMessage.textContent = errorData.message || "Đăng ký thất bại. Vui lòng thử lại!";
+                // Check for specific error messages in the response
+                if (responseText.includes("Email đã tồn tại")) {
+                    errorMessage.textContent = "Email đã tồn tại. Vui lòng dùng email khác.";
+                } else if (responseText.includes("Mật khẩu nhập lại không khớp")) {
+                    errorMessage.textContent = "Mật khẩu nhập lại không khớp.";
+                } else {
+                    errorMessage.textContent = responseText || "Đăng ký thất bại. Vui lòng thử lại!";
+                }
             }
+
         } catch (error) {
             errorMessage.textContent = "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.";
         } finally {
@@ -76,6 +99,7 @@
         }
     });
 </script>
+
 
 </body>
 </html>

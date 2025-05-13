@@ -47,8 +47,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/login", "/", "/static/**", "/resources/**", "/api/v1/auth/**").permitAll() // Cho phép truy cập công khai
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/").permitAll()
                         .requestMatchers("/register").permitAll()
+                        .requestMatchers("/admin-dashboard").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)

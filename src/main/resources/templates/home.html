@@ -8,19 +8,42 @@
 <body>
 
 <!-- Gọi navbar từ fragment -->
-<th:block th:replace="fragments/navbar :: navbar"></th:block>
+<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
 
 <!-- Nội dung chính -->
 <div class="container">
-    <h2>Chào mừng bạn đến với hệ thống quản lý khách sạn!</h2>
+    <h2>Chào mừng <span id="user-name">Người dùng</span> đến với hệ thống quản lý khách sạn!</h2>
     <p>Hệ thống giúp bạn quản lý đặt phòng, khách hàng và dịch vụ một cách dễ dàng và hiệu quả.</p>
 
     <div style="margin-top: 30px;">
+        <!-- Các nút chuyển hướng -->
         <a href="/bookings"><button>Quản lý đặt phòng</button></a>
         <a href="/customers"><button>Quản lý khách hàng</button></a>
-        <a href="/services"><button>Dịch vụ khách sạn</button></a>
+        <a href="/employee"><button>Quản lý nhân viên</button></a>
     </div>
 </div>
+
+<script>
+    window.onload = function() {
+        // Lấy thông tin người dùng từ localStorage
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (user) {
+            // Hiển thị tên người dùng
+            document.getElementById('user-name').textContent = user.firstname + ' ' + user.lastname;
+
+            // Điều hướng dựa trên vai trò người dùng
+            if (user.role === 'ADMIN') {
+                window.location.href = '/admin-dashboard';  // Trang dành cho admin
+            } else if (user.role === 'CUSTOMER') {
+                window.location.href = '/customer-dashboard';  // Trang dành cho khách hàng
+            }
+        } else {
+            // Nếu không có thông tin người dùng, yêu cầu đăng nhập lại
+            window.location.href = '/login';
+        }
+    }
+</script>
 
 </body>
 </html>

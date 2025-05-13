@@ -25,4 +25,8 @@ public class HomeController {
     public String register(){
         return "register";
     }
+    @GetMapping("/admin-dashboard")
+    public String admin(){
+        return "admin-dashboard";
+    }
 }

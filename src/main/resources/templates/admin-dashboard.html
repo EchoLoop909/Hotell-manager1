@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- Gọi navbar từ fragment -->
+<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+<!-- Nội dung chính -->
+<div class="container">
+  <h2>Chào mừng <span id="admin-name">Quản trị viên</span> đến với trang quản lý admin!</h2>
+
+  <p>Trang này dành riêng cho các quản trị viên của hệ thống.</p>
+
+  <!-- Các chức năng quản lý dành cho admin -->
+  <div style="margin-top: 30px;">
+    <a href="/manage-users"><button>Quản lý người dùng</button></a>
+    <a href="/manage-rooms"><button>Quản lý phòng</button></a>
+    <a href="/manage-services"><button>Quản lý dịch vụ</button></a>
+  </div>
+</div>
+
+<script>
+  window.onload = function() {
+      // Lấy thông tin người dùng từ localStorage
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (user) {
+          // Hiển thị tên người dùng (firstname)
+          document.getElementById('admin-name').textContent = user.firstname;
+
+          // Kiểm tra xem người dùng có phải là admin không
+          if (user.role !== 'ADMIN') {
+              // Nếu không phải là admin, điều hướng về trang chủ hoặc đăng nhập
+              window.location.href = '/home';  // Hoặc trang đăng nhập
+          }
+      } else {
+          // Nếu không có thông tin người dùng, yêu cầu đăng nhập lại
+          window.location.href = '/login';
+      }
+  }
+</script>
+
+</body>
+</html>
