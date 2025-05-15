@@ -49,6 +49,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/api/v1/auth/**").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/admin-dashboard").permitAll()
+                        .requestMatchers("/manage-users").permitAll()
+                        .requestMatchers("/customers", "/api/v1/customers/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

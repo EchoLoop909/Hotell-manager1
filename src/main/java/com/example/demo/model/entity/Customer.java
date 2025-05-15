@@ -15,14 +15,11 @@ import lombok.EqualsAndHashCode;
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int customerId;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
-    private User user;
-
-    @Column(nullable = false)
-    private String name;
-
-    private String phone;
+    private Long id;
+    private String firstname;
+    private String lastname;
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

@@ -29,4 +29,8 @@ public class HomeController {
     public String admin(){
         return "admin-dashboard";
     }
+    @GetMapping("/manage-users")
+    public String manageusers(){
+        return "manage-users";
+    }
 }

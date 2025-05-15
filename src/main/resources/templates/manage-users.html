@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý khách hàng</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- Gọi navbar fragment -->
+<th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+<!-- Nội dung chính -->
+<div class="container">
+    <h2>Quản lý khách hàng</h2>
+
+    <!-- Nút thêm khách hàng -->
+    <button onclick="showAddForm()">Thêm khách hàng</button>
+
+    <!-- Form thêm/sửa khách hàng -->
+    <div id="customer-form" style="display: none; margin-top: 20px;">
+        <h3 id="form-title">Thêm khách hàng</h3>
+        <form id="manage-customer-form">
+            <input type="hidden" id="customer-id">
+            <label for="firstname">Tên:</label>
+            <input type="text" id="firstname" name="firstname" required />
+
+            <label for="lastname">Họ:</label>
+            <input type="text" id="lastname" name="lastname" required />
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+
+            <p id="form-error" class="error" style="color: red;"></p>
+            <button type="submit" id="submit-btn">Lưu</button>
+            <button type="button" onclick="hideForm()">Hủy</button>
+        </form>
+    </div>
+
+    <!-- Bảng danh sách khách hàng -->
+    <table border="1" style="margin-top: 20px; width: 100%;">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Họ</th>
+            <th>Email</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+        <tbody id="customer-table"></tbody>
+    </table>
+</div>
+
+<script>
+    // Load danh sách khách hàng khi trang được tải
+    document.addEventListener("DOMContentLoaded", loadCustomers);
+
+    async function loadCustomers() {
+        try {
+            const response = await fetch('/api/v1/customers', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            if (response.ok) {
+                const customers = await response.json();
+                const tableBody = document.getElementById("customer-table");
+                tableBody.innerHTML = "";
+                customers.forEach(customer => {
+                    const row = `
+                        <tr>
+                            <td>${customer.id}</td>
+                            <td>${customer.firstname}</td>
+                            <td>${customer.lastname}</td>
+                            <td>${customer.email}</td>
+                            <td>
+                                <button onclick="showEditForm(${customer.id}, '${customer.firstname}', '${customer.lastname}', '${customer.email}')">Sửa</button>
+                                <button onclick="deleteCustomer(${customer.id})">Xóa</button>
+                            </td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } else {
+                alert("Lỗi khi tải danh sách khách hàng: " + await response.text());
+            }
+        } catch (error) {
+            alert("Không thể kết nối tới máy chủ.");
+        }
+    }
+
+    // Hiển thị form thêm khách hàng
+    function showAddForm() {
+        document.getElementById("customer-form").style.display = "block";
+        document.getElementById("form-title").textContent = "Thêm khách hàng";
+        document.getElementById("manage-customer-form").reset();
+        document.getElementById("customer-id").value = "";
+        document.getElementById("form-error").textContent = "";
+    }
+
+    // Hiển thị form sửa khách hàng
+    function showEditForm(id, firstname, lastname, email) {
+        document.getElementById("customer-form").style.display = "block";
+        document.getElementById("form-title").textContent = "Sửa khách hàng";
+        document.getElementById("customer-id").value = id;
+        document.getElementById("firstname").value = firstname;
+        document.getElementById("lastname").value = lastname;
+        document.getElementById("email").value = email;
+        document.getElementById("form-error").textContent = "";
+    }
+
+    // Ẩn form
+    function hideForm() {
+        document.getElementById("customer-form").style.display = "none";
+    }
+
+    // Xử lý form thêm/sửa
+    document.getElementById("manage-customer-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const id = document.getElementById("customer-id").value;
+        const firstname = document.getElementById("firstname").value.trim();
+        const lastname = document.getElementById("lastname").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const errorMessage = document.getElementById("form-error");
+        const submitBtn = document.getElementById("submit-btn");
+
+        errorMessage.textContent = "";
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Đang lưu...";
+
+        try {
+            const url = id ? `/api/v1/customers/${id}` : '/api/v1/customers';
+            const method = id ? 'PUT' : 'POST';
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                body: JSON.stringify({ firstname, lastname, email })
+            });
+
+            if (response.ok) {
+                hideForm();
+                loadCustomers();
+            } else {
+                errorMessage.textContent = await response.text() || "Lưu thất bại.";
+            }
+        } catch (error) {
+            errorMessage.textContent = "Không thể kết nối tới máy chủ.";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Lưu";
+        }
+    });
+
+    // Xóa khách hàng
+    async function deleteCustomer(id) {
+        if (!confirm("Bạn có chắc muốn xóa khách hàng này?")) return;
+
+        try {
+            const response = await fetch(`/api/v1/customers/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            if (response.ok) {
+                loadCustomers();
+            } else {
+                alert("Lỗi khi xóa khách hàng: " + await response.text());
+            }
+        } catch (error) {
+            alert("Không thể kết nối tới máy chủ.");
+        }
+    }
+</script>
+
+</body>
+</html>
