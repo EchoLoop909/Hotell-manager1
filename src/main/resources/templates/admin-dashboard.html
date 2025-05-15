@@ -54,7 +54,7 @@
   function clearLocalStorageAndRedirect() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    localStorage.removeItem("user");=
     setTimeout(() => {
       window.location.href = "/login";
     }, 1000);

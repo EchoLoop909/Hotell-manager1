@@ -141,7 +141,7 @@ package com.example.demo.auth;
 import com.example.demo.config.JwtService;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.request.LogoutRequest;
-import com.example.demo.model.request.LogoutResponse;
+import com.example.demo.model.response.LogoutResponse;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
