@@ -13,6 +13,7 @@
 <!-- Nội dung chính -->
 <div class="container">
     <h2>Đăng nhập</h2>
+    <div id="notification" style="display: none; padding: 10px; margin: 10px; border-radius: 5px; position: fixed; top: 10px; right: 10px;"></div>
     <form id="login-form">
         <label for="email">Email:</label>
         <input type="text" name="email" id="email" required />
@@ -27,6 +28,17 @@
 </div>
 
 <script>
+    function showNotification(message, isError = false) {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.style.backgroundColor = isError ? "#f44336" : "#4caf50";
+        notification.style.color = "#fff";
+        notification.style.display = "block";
+        setTimeout(() => {
+            notification.style.display = "none";
+        }, 3000);
+    }
+
     document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault();
 
@@ -50,27 +62,31 @@
 
             const responseData = await response.json();
 
-            if (response.ok && responseData.access_token) {
-                // Kiểm tra và lưu token + user
+            console.log('Response from authenticate:', responseData);
+
+            if (response.ok && responseData.access_token && responseData.user) {
                 const user = responseData.user;
 
                 if (user && user.role) {
                     localStorage.setItem('accessToken', responseData.access_token);
+                    localStorage.setItem('refreshToken', responseData.refresh_token || "");
                     localStorage.setItem('user', JSON.stringify(user));
 
-                    // Điều hướng theo role
-                    if (user.role === 'ADMIN') {
-                        window.location.href = "/admin-dashboard";
-                    } else {
-                        window.location.href = "/home";
-                    }
+                    showNotification("Đăng nhập thành công", false);
+
+                    setTimeout(() => {
+                        if (user.role === 'ADMIN') {
+                            window.location.href = "/admin-dashboard";
+                        } else {
+                            window.location.href = "/home";
+                        }
+                    }, 1000);
                 } else {
                     errorMessage.textContent = "Đăng nhập thành công nhưng thiếu thông tin người dùng.";
                 }
             } else {
                 errorMessage.textContent = responseData.message || "Đăng nhập thất bại.";
             }
-
         } catch (error) {
             errorMessage.textContent = "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.";
             console.error('Fetch error:', error);
