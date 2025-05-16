@@ -3,8 +3,6 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,20 +10,22 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = "bookingId")
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int bookingId;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = true)
+    @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = true)
+    private Employee employee;
 
     @Column(nullable = false)
     private LocalDate checkIn;
@@ -35,4 +35,12 @@ public class Booking {
 
     @Column(nullable = false)
     private BigDecimal totalPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "ENUM('đã_xác_nhận', 'đã_hủy') DEFAULT 'đã_xác_nhận'")
+    private BookingStatus status;
+
+    public enum BookingStatus {
+        đã_xác_nhận, đã_hủy
+    }
 }

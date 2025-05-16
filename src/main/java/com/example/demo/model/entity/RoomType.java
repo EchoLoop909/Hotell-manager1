@@ -3,14 +3,12 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = "typeId")
 public class RoomType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,5 +17,12 @@ public class RoomType {
     @Column(nullable = false)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(nullable = false)
+    private int capacity;
+
+    @Column(nullable = false)
+    private BigDecimal defaultPrice;
 }

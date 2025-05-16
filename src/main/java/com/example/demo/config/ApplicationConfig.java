@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.CustomerRepository;
+import com.example.demo.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,22 +19,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> (UserDetails) userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        return username -> customerRepository.findByEmail(username)
+                .map(UserDetails.class::cast)
+                .orElseGet(() -> employeeRepository.findByEmail(username)
+                        .map(UserDetails.class::cast)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found")));
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenProvider = new DaoAuthenticationProvider();
-
-        authenProvider.setUserDetailsService(userDetailsService());
-        authenProvider.setPasswordEncoder(passwordEncoder());
-        
-        return authenProvider;
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean

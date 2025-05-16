@@ -3,16 +3,12 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = "roomId")
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +23,8 @@ public class Room {
 
     @Column(nullable = false)
     private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "ENUM('trống', 'đã_đặt', 'đang_dọn') DEFAULT 'trống'")
+    private RoomStatus status;
 }

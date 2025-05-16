@@ -3,16 +3,12 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = "serviceId")
 public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +19,7 @@ public class Service {
 
     @Column(nullable = false)
     private BigDecimal price;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

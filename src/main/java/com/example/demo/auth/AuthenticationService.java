@@ -1,178 +1,184 @@
 package com.example.demo.auth;
 
 import com.example.demo.config.JwtService;
-import com.example.demo.model.entity.RefreshToken;
-import com.example.demo.model.entity.Role;
-import com.example.demo.model.entity.User;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.refreshTokenRepository;
-import com.example.demo.service.RefreshTokenService;
+import com.example.demo.model.entity.Customer;
+import com.example.demo.model.entity.Employee;
+import com.example.demo.repository.CustomerRepository;
+import com.example.demo.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-
 public class AuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     private final PasswordEncoder passwordEncoder;
-
-    private final UserRepository userRepository;
-
+    private final CustomerRepository customerRepository;
+    private final EmployeeRepository employeeRepository;
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
 
-    private final refreshTokenRepository refreshTokenRepository;
+    @Transactional
+    public AuthenticationResponse register(RegisterRequest request) {
+        logger.info("Registering user with email: {}", request.getEmail());
+        if (customerRepository.findByEmail(request.getEmail()).isPresent() ||
+                employeeRepository.findByEmail(request.getEmail()).isPresent()) {
+            logger.warn("Email already exists: {}", request.getEmail());
+            throw new IllegalArgumentException("Email already exists");
+        }
 
-//    public AuthenticationResponse register(RegisterRequest request) {
-//        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-//        if (userOptional.isPresent()) {
-//            throw new RuntimeException("Email already exists");
-//        }
-//
-//        User user = User.builder()
-//                .firstname(request.getFirstname())
-//                .lastname(request.getLastname())
-//                .email(request.getEmail())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .role(Role.ADMIN)//chinh role
-//                .build();
-//
-//        userRepository.save(user);
-//
-//        String accessToken = jwtService.generateToken(user);
-//        String refreshToken = jwtService.generateRefreshToken(user);
-//
-////        String jwtToken = jwtService.generateToken(user);
-//        return AuthenticationResponse.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
-public AuthenticationResponse register(RegisterRequest request) {
-    Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-    if (userOptional.isPresent()) {
-        throw new IllegalArgumentException("Email already exists");
-    }
+        Customer customer = new Customer();
+        customer.setName(request.getName());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
-    User user = User.builder()
-            .firstname(request.getFirstname())
-            .lastname(request.getLastname())
-            .email(request.getEmail())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .role(Role.ADMIN)
-            .build();
+        customerRepository.save(customer);
+        logger.info("Saved customer: {}", customer.getEmail());
 
-    userRepository.save(user);
-
-    String accessToken = jwtService.generateToken(user);
-    String refreshToken = jwtService.generateRefreshToken(user);
-
-    return AuthenticationResponse.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .firstname(user.getFirstname())
-            .lastname(user.getLastname())
-            .role(user.getRole().name())
-            .build();
-}
-
-//    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        // Lấy thông tin người dùng từ cơ sở dữ liệu
-//        var user = userRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//
-//        // Tạo access token và refresh token
-//        var accessToken = jwtService.generateToken((UserDetails) user);
-//        var refreshToken = jwtService.generateRefreshToken((UserDetails) user);
-//
-//        // Lưu refresh token vào cơ sở dữ liệu
-//        RefreshToken token = new RefreshToken();
-//        token.setToken(refreshToken);
-//        token.setUser(user);
-//        token.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));  // Đặt thời gian hết hạn cho refresh token
-//        token.setRevoked(false);  // Đảm bảo rằng token không bị hủy
-//
-//        // Lưu token vào bảng refreshToken trong cơ sở dữ liệu
-//        refreshTokenRepository.save(token);
-//
-//        // Trả về AuthenticationResponse
-//        return AuthenticationResponse.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .firstname(user.getFirstname())
-//                .lastname(user.getLastname())
-//                .role(user.getRole().name())
-//                .build();
-//    }
-
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        var accessToken = jwtService.generateToken((UserDetails) user);
-        var refreshToken = jwtService.generateRefreshToken((UserDetails) user);
-
-        RefreshToken token = new RefreshToken();
-        token.setToken(refreshToken);
-        token.setUser(user);
-        token.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
-        token.setRevoked(false);
-
-        refreshTokenRepository.save(token);
+        String accessToken = jwtService.generateToken(customer);
+        String refreshToken = UUID.randomUUID().toString();
+        customer.setRefreshToken(refreshToken);
+        customer.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
+        customerRepository.save(customer);
+        logger.info("Saved refresh token for customer: {}", customer.getEmail());
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .role(user.getRole().name())
+                .name(customer.getName())
+                .role("CUSTOMER")
                 .build();
     }
 
-//    public void deleteToken(String refreshToken) {
-//        Optional<RefreshToken> tokenOptional = refreshTokenRepository.findByToken(refreshToken);
-//        if (tokenOptional.isPresent()) {
-//            // Xóa token khỏi cơ sở dữ liệu
-//            refreshTokenRepository.delete(tokenOptional.get());
-//        } else {
-//            throw new RuntimeException("Refresh token not found");
-//        }
-//    }
-public void deleteToken(String refreshToken) {
-    if (refreshToken == null || refreshToken.trim().isEmpty()) {
-        throw new IllegalArgumentException("Refresh token cannot be null or empty");
+    @Transactional
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        logger.info("Authenticating user with email: {}", request.getEmail());
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            logger.error("Authentication failed for email: {}. Error: {}", request.getEmail(), e.getMessage());
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        UserDetails user = customerRepository.findByEmail(request.getEmail())
+                .map(UserDetails.class::cast)
+                .orElseGet(() -> employeeRepository.findByEmail(request.getEmail())
+                        .map(UserDetails.class::cast)
+                        .orElseThrow(() -> {
+                            logger.error("User not found: {}", request.getEmail());
+                            return new UsernameNotFoundException("User not found");
+                        }));
+
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = UUID.randomUUID().toString();
+        LocalDateTime expiry = LocalDateTime.now().plusDays(7);
+
+        String name;
+        String role;
+        if (user instanceof Customer customer) {
+            logger.info("Found customer: {}", customer.getEmail());
+            customer.setRefreshToken(refreshToken);
+            customer.setRefreshTokenExpiry(expiry);
+            try {
+                customerRepository.save(customer);
+                logger.info("Saved refresh token for customer: {}", customer.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to save refresh token for customer: {}. Error: {}", customer.getEmail(), e.getMessage());
+                throw new RuntimeException("Failed to save refresh token", e);
+            }
+            name = customer.getName();
+            role = "CUSTOMER";
+        } else if (user instanceof Employee employee) {
+            logger.info("Found employee: {}", employee.getEmail());
+            employee.setRefreshToken(refreshToken);
+            employee.setRefreshTokenExpiry(expiry);
+            try {
+                employeeRepository.save(employee);
+                logger.info("Saved refresh token for employee: {}", employee.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to save refresh token for employee: {}. Error: {}", employee.getEmail(), e.getMessage());
+                throw new RuntimeException("Failed to save refresh token", e);
+            }
+            name = employee.getName();
+            role = employee.getEmployeeRole().name();
+        } else {
+            logger.error("Unknown user type for email: {}", request.getEmail());
+            throw new IllegalStateException("Unknown user type");
+        }
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .name(name)
+                .role(role)
+                .build();
     }
 
-    Optional<RefreshToken> tokenOptional = refreshTokenRepository.findByToken(refreshToken);
-    if (tokenOptional.isPresent()) {
-        refreshTokenRepository.delete(tokenOptional.get());
-    } else {
-        throw new UsernameNotFoundException("Refresh token not found");
+    @Transactional
+    public void deleteToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.trim().isEmpty()) {
+            logger.warn("Attempt to delete null or empty refresh token");
+            throw new IllegalArgumentException("Refresh token cannot be null or empty");
+        }
+
+        logger.info("Attempting to delete refresh token: {}", refreshToken);
+
+        boolean tokenDeleted = false;
+
+        Optional<Customer> customer = customerRepository.findByRefreshToken(refreshToken);
+        if (customer.isPresent()) {
+            Customer c = customer.get();
+            logger.info("Found customer with refresh token: {}", c.getEmail());
+            c.setRefreshToken(null);
+            c.setRefreshTokenExpiry(null);
+            try {
+                customerRepository.save(c);
+                logger.info("Successfully deleted refresh token for customer: {}", c.getEmail());
+                tokenDeleted = true;
+            } catch (Exception e) {
+                logger.error("Failed to save customer after clearing refresh token: {}. Error: {}", c.getEmail(), e.getMessage());
+                throw new RuntimeException("Failed to clear refresh token", e);
+            }
+        }
+
+        Optional<Employee> employee = employeeRepository.findByRefreshToken(refreshToken);
+        if (employee.isPresent()) {
+            Employee e = employee.get();
+            logger.info("Found employee with refresh token: {}", e.getEmail());
+            e.setRefreshToken(null);
+            e.setRefreshTokenExpiry(null);
+            try {
+                employeeRepository.save(e);
+                logger.info("Successfully deleted refresh token for employee: {}", e.getEmail());
+                tokenDeleted = true;
+            } catch (Exception e1) {
+                logger.error("Failed to save employee after clearing refresh token: {}. Error: {}");
+                throw new RuntimeException("Failed to clear refresh token", e1);
+            }
+        }
+
+        if (!tokenDeleted) {
+            logger.warn("Refresh token not found in database: {}", refreshToken);
+            throw new IllegalArgumentException("Refresh token not found in database");
+        }
     }
-}
 }

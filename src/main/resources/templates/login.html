@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Đăng nhập</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
 <body>
 
@@ -16,7 +17,7 @@
     <div id="notification" style="display: none; padding: 10px; margin: 10px; border-radius: 5px; position: fixed; top: 10px; right: 10px;"></div>
     <form id="login-form">
         <label for="email">Email:</label>
-        <input type="text" name="email" id="email" required />
+        <input type="email" name="email" id="email" required />
 
         <label for="password">Mật khẩu:</label>
         <input type="password" name="password" id="password" required />
@@ -24,6 +25,7 @@
         <p id="error-message" class="error" style="color: red;"></p>
 
         <button type="submit" id="submit-btn">Đăng nhập</button>
+        <p>Chưa có tài khoản? <a href="/register">Đăng ký</a></p>
     </form>
 </div>
 
@@ -75,8 +77,8 @@
                     showNotification("Đăng nhập thành công", false);
 
                     setTimeout(() => {
-                        if (user.role === 'ADMIN') {
-                            window.location.href = "/admin-dashboard";
+                        if (user.role === 'lễ_tân' || user.role === 'quản_lý') {
+                            window.location.href = "/customers";
                         } else {
                             window.location.href = "/home";
                         }

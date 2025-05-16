@@ -3,17 +3,13 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = "invoiceId")
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +23,20 @@ public class Invoice {
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "ENUM('đã_thanh_toán', 'chưa_thanh_toán') DEFAULT 'chưa_thanh_toán'")
     private InvoiceStatus status;
 
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "ENUM('VNPay', 'Visa', 'tại_quầy')")
+    private PaymentMethod paymentMethod;
 
-    private LocalDate paymentDate;
+    private LocalDateTime paymentDate;
 
     public enum InvoiceStatus {
-        Paid, Unpaid
+        đã_thanh_toán, chưa_thanh_toán
+    }
+
+    public enum PaymentMethod {
+        VNPay, Visa, tại_quầy
     }
 }
