@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roomId;
+    private Integer roomId;
 
     @Column(nullable = false, unique = true)
     private String sku;

@@ -7,22 +7,24 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "room_type")
 @Getter
 @Setter
 public class RoomType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int typeId;
+    @Column(name = "type_id")
+    private Integer typeId;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private int capacity;
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity;
 
-    @Column(nullable = false)
+    @Column(name = "default_price", nullable = false)
     private BigDecimal defaultPrice;
 }

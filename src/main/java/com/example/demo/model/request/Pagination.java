@@ -1,14 +1,18 @@
 package com.example.demo.model.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+//
+//@Data
+//@AllArgsConstructor
+//@NoArgsConstructor
+//@Builder
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Pagination {
     long totalElements;
     int totalPages;

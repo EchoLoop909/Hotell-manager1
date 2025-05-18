@@ -2,22 +2,23 @@ package com.example.demo.controller;
 
 import com.example.demo.model.EmployeeDto;
 import com.example.demo.service.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/employees")
+@RequestMapping(
+        path = "/api/v1/employees",
+        produces = MediaType.APPLICATION_JSON_VALUE,  // đảm bảo luôn trả JSON
+        consumes = MediaType.APPLICATION_JSON_VALUE   // nhận JSON
+)
+@RequiredArgsConstructor
 public class EmployeeController {
 
-    @Autowired
     private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
-    }
-
-    @PostMapping("/creat")
+    @PostMapping("/create")
     public ResponseEntity<?> createEmployee(@RequestBody EmployeeDto employee) {
         return employeeService.createEmployee(employee);
     }

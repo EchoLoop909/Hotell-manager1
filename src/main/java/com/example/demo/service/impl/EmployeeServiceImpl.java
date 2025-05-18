@@ -1,70 +1,13 @@
-//package com.example.demo.service.impl;
-//
-//import com.example.demo.model.EmployeeDto;
-//import com.example.demo.model.entity.Employee;
-//import com.example.demo.repository.EmployeeRepository;
-//import com.example.demo.service.EmployeeService;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Optional;
-//
-//@Service
-//public class EmployeeServiceIpml implements EmployeeService {
-//
-//    private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceIpml.class);
-//
-//    @Autowired
-//    private EmployeeRepository employeeRepository;
-//
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
-//
-//    public ResponseEntity<?> createEmployee(EmployeeDto employee) {
-//        try {
-//            logger.info("Attempting to create employee with email: {}", employee.getEmail());
-//            Optional<Employee> existingEmployee = employeeRepository.findByEmail(employee.getEmail());
-//            if (existingEmployee.isPresent()) {
-//                logger.warn("Email {} already exists", employee.getEmail());
-//                return new ResponseEntity<>("Email Already Exists", HttpStatus.CONFLICT);
-//            }
-//
-//            Employee newEmployee = new Employee();
-//            newEmployee.setEmail(employee.getEmail());
-//            newEmployee.setName(employee.getName());
-//            newEmployee.setPassword(passwordEncoder.encode(employee.getPassword()));
-//            newEmployee.setEmployeeRole(Employee.EmployeeRole.valueOf(employee.getEmployee_role()));
-//
-//            employeeRepository.save(newEmployee);
-//            logger.info("Employee created successfully: {}", employee.getEmail());
-//
-//            return new ResponseEntity<>("Employee Created Successfully", HttpStatus.CREATED);
-//        } catch (IllegalArgumentException e) {
-//            logger.error("Invalid role: {}", employee.getEmployee_role(), e);
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role: " + e.getMessage());
-//        } catch (Exception e) {
-//            logger.error("Error creating employee: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
-//        }
-//    }
-//
-//}
-
-
 package com.example.demo.service.impl;
 
 import com.example.demo.model.EmployeeDto;
 import com.example.demo.model.entity.Employee;
+import com.example.demo.model.response.ApiResponse;
 import com.example.demo.repository.EmployeeRepository;
 import com.example.demo.service.EmployeeService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,59 +16,48 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceImpl.class);
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final EmployeeRepository employeeRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public ResponseEntity<?> createEmployee(EmployeeDto employee) {
+    public ResponseEntity<?> createEmployee(EmployeeDto dto) {
+        logger.info("Tạo nhân viên: {}", dto.getEmail());
+
+        // Kiểm tra email đã tồn tại
+        Optional<Employee> existing = employeeRepository.findByEmail(dto.getEmail());
+        if (existing.isPresent()) {
+            logger.warn("Email đã tồn tại: {}", dto.getEmail());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email da ton tai");
+        }
+
         try {
-            logger.info("Attempting to create employee with email: {}", employee.getEmail());
-            Optional<Employee> existingEmployee = employeeRepository.findByEmail(employee.getEmail());
-            if (existingEmployee.isPresent()) {
-                logger.warn("Email {} already exists", employee.getEmail());
-                return new ResponseEntity<>("Email Already Exists", HttpStatus.CONFLICT);
-            }
+            // Map DTO -> Entity
+            Employee emp = new Employee();
+            emp.setEmail(dto.getEmail());
+            emp.setName(dto.getName());
+            emp.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-            Employee newEmployee = new Employee();
-            newEmployee.setEmail(employee.getEmail());
-            newEmployee.setName(employee.getName());
-            newEmployee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            // Xử lý role
+            String normalizedRole = dto.getEmployeeRole().trim().toUpperCase().replace(" ", "_");
+            emp.setEmployeeRole(Employee.EmployeeRole.valueOf(normalizedRole));
 
-            // Ánh xạ employee_role
-            String roleInput = employee.getEmployee_role().trim().toUpperCase().replace(" ", "_");
-            switch (roleInput) {
-                case "QUẢN_LÝ":
-                case "QUAN_LY":
-                case "quản_lý":
-                    newEmployee.setEmployeeRole(Employee.EmployeeRole.QUAN_LY);
-                    break;
-                case "LỄ_TÂN":
-                case "LE_TAN":
-                case "lễ_tân":
-                    newEmployee.setEmployeeRole(Employee.EmployeeRole.LE_TAN);
-                    break;
-                default:
-                    logger.error("Invalid role: {}", employee.getEmployee_role());
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role: " + employee.getEmployee_role());
-            }
+            // Lưu nhân viên
+            Employee savedEmployee = employeeRepository.save(emp);
+            logger.info("Nhân viên đã được tạo: {}", savedEmployee.getEmail());
 
-            employeeRepository.save(newEmployee);
-            logger.info("Employee created successfully: {}", employee.getEmail());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên đã được tạo");
 
-            return new ResponseEntity<>("Employee Created Successfully", HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid role: {}", employee.getEmployee_role(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role: " + e.getMessage());
+            logger.error("Vai trò không hợp lệ: {}", dto.getEmployeeRole(), e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vai trò không hợp lệ");
         } catch (Exception e) {
-            logger.error("Error creating employee: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lỗi không mong muốn");
         }
     }
 }
