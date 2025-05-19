@@ -32,6 +32,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/authenticate").permitAll()
                         .requestMatchers("//api/v1/rooms/**").hasAnyAuthority("QUAN_LY")
                         .requestMatchers("/api/v1/roomType/**").hasAnyAuthority("QUAN_LY")
+                        .requestMatchers("/api/bookings/**").permitAll()
+                        .requestMatchers("/api/Service/**").hasAuthority("QUAN_LY")
+                        .requestMatchers("//api/booking-services").permitAll()
                         .anyRequest().authenticated()
                 )
 //                .exceptionHandling(exception -> exception
