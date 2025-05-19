@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.model.RoomDto;
+import com.example.demo.model.RoomTypeDto;
 import com.example.demo.model.entity.RoomType;
 import com.example.demo.repository.RoomTypeRepository;
 import com.example.demo.service.RoomService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomTypeServiceIpml implements RoomTypeService {
@@ -41,6 +43,30 @@ public class RoomTypeServiceIpml implements RoomTypeService {
         return ResponseEntity.ok(results);
         } catch (Exception e) {
             logger.error("Lỗi khi tìm phòng: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> create(RoomTypeDto roomTypeDto) {
+        try{
+            Optional<RoomType> room = roomTypeRepository.findByName(roomTypeDto.getName());
+            if(room.isPresent()){
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body("Room type name already exists.");
+            }
+
+            RoomType roomType = new RoomType();
+            roomType.setName(roomTypeDto.getName());
+            roomType.setCapacity(roomTypeDto.getCapacity());
+            roomType.setDefaultPrice(roomTypeDto.getDefaultPrice());
+            roomType.setDescription(roomTypeDto.getDescription());
+
+            roomTypeRepository.save(roomType);
+            return ResponseEntity.status(HttpStatus.CREATED).body(roomType);
+        }catch(Exception e){
+            logger.error("Loi DB: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

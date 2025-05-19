@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.RoomTypeDto;
 import com.example.demo.service.RoomTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,5 +22,10 @@ public class RoomTypeController {
                                        @RequestParam(required = false) BigDecimal minPrice,
                                        @RequestParam(required = false) BigDecimal maxPrice ){
     return roomTypeService.searchRoom(capacity,name,description,minPrice,maxPrice);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createRoomType(@RequestBody RoomTypeDto roomTypeDto){
+        return roomTypeService.create(roomTypeDto);
     }
 }

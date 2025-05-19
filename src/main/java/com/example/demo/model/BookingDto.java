@@ -1,20 +1,20 @@
-package com.example.demo.model.response;
+package com.example.demo.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
-public class BookingResponseDTO {
+@Data
+public class BookingDto {
     private int bookingId;
-    private String customerName;
-    private String roomSku;
     private LocalDate checkIn;
     private LocalDate checkOut;
-    private BigDecimal totalPrice;
     private String status;
-    private String paymentStatus;
+    private BigDecimal totalPrice;
+    private int customerId;
+    private int employeeId;
+    private int roomId;
 }

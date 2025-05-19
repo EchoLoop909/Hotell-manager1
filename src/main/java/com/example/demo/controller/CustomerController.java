@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @Controller
 public class CustomerController {
     private final CustomerServiceIpml customerServiceIpml;
@@ -22,7 +23,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerServiceIpml.getAllCustomers());
     }
 
-    @PostMapping("/api/v1/customers")
+    @PostMapping("/api/v1/customers/add")
     public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
         try {
             customerServiceIpml.addCustomer(customer);
@@ -43,7 +44,7 @@ public class CustomerController {
         }
     }
 
-    @DeleteMapping("/api/v1/customers/{id}")
+    @DeleteMapping("/api/v1/customers/delete/{id}")
     public ResponseEntity<?> deleteCustomer(@PathVariable Integer id) {
         try {
             customerServiceIpml.deleteCustomer(id);

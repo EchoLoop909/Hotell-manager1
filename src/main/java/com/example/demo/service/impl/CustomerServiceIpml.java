@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.entity.Customer;
 import com.example.demo.repository.CustomerRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.Optional;
 @Service
 public class CustomerServiceIpml {
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomerServiceIpml(CustomerRepository customerRepository) {
+    public CustomerServiceIpml(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Customer> getAllCustomers() {
@@ -24,6 +27,7 @@ public class CustomerServiceIpml {
         if (existingUser.isPresent()) {
             throw new RuntimeException("Email đã tồn tại.");
         }
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customerRepository.save(customer);
     }
 
