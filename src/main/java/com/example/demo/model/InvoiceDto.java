@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-public class invoiceDto {
+public class InvoiceDto {
     private Integer invoiceId;
     private LocalDateTime paymentDate;
     private String paymentMethod; // "VNPay", "Visa", "tại_quầy"

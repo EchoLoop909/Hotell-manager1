@@ -43,7 +43,11 @@ public class EmployeeServiceImpl implements EmployeeService {
             emp.setPassword(passwordEncoder.encode(dto.getPassword()));
 
             // Xử lý role
+            if (dto.getEmployeeRole() == null) {
+                throw new IllegalArgumentException("Employee role must not be null");
+            }
             String normalizedRole = dto.getEmployeeRole().trim().toUpperCase().replace(" ", "_");
+
             emp.setEmployeeRole(Employee.EmployeeRole.valueOf(normalizedRole));
 
             // Lưu nhân viên

@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -56,7 +57,7 @@ public class Booking {
             return dbValue;
         }
 
-        @com.fasterxml.jackson.annotation.JsonCreator
+        @JsonCreator
         public static BookingStatus fromDbValue(String value) {
             for (BookingStatus status : BookingStatus.values()) {
                 if (status.dbValue.equalsIgnoreCase(value.trim())) {

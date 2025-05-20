@@ -22,6 +22,10 @@ public class Invoice {
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private Service service;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('đã_thanh_toán', 'chưa_thanh_toán') DEFAULT 'chưa_thanh_toán'")
     private InvoiceStatus status;

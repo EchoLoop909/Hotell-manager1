@@ -52,16 +52,13 @@ public class RoomServiceImpl implements RoomService {
             if (roomDto.getPrice() == null || roomDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Giá phòng phải lớn hơn 0");
             }
-            if (roomDto.getStatus() == null) {
-                throw new IllegalArgumentException("Trạng thái phòng không được để trống");
-            }
 
             // Tạo Room
             Room room = new Room();
             room.setSku(roomDto.getSku().trim());
             room.setType(roomType);
             room.setPrice(roomDto.getPrice());
-            room.setStatus(roomDto.getStatus());
+            room.setStatus(RoomStatus.valueOf("trống"));
 
             // Lưu Room
             Room savedRoom = roomRepository.save(room);
@@ -72,7 +69,7 @@ public class RoomServiceImpl implements RoomService {
             result.setSku(savedRoom.getSku());
             result.setTypeId(savedRoom.getType().getTypeId());
             result.setPrice(savedRoom.getPrice());
-            result.setStatus(savedRoom.getStatus());
+            result.setStatus(RoomStatus.valueOf("trống"));
 
             logger.info("Tạo phòng {} thành công", savedRoom.getSku());
             return new ResponseEntity<>(result, HttpStatus.CREATED);

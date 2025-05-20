@@ -2,6 +2,8 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.BookingDto;
 import com.example.demo.model.entity.Booking;
+import com.example.demo.model.entity.Room;
+import com.example.demo.model.entity.RoomStatus;
 import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.repository.EmployeeRepository;
@@ -117,6 +119,10 @@ public class BookingServiceImpl implements BookingService {
 
             // 8. Lưu booking
             booking = bookingRepository.save(booking);
+
+            Room room1 = booking.getRoom();
+            room1.setStatus(RoomStatus.valueOf("đã_đặt"));
+            roomRepository.save(room1);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("Đặt phòng thành công");
