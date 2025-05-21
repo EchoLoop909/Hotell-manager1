@@ -1,13 +1,19 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.model.InvoiceDto;
-import com.example.demo.model.entity.Booking;
-import com.example.demo.model.entity.Invoice;
-import com.example.demo.model.entity.Service;
+import com.example.demo.model.entity.*;
 import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.InvoiceRepository;
 import com.example.demo.repository.ServiceRepository;
 import com.example.demo.service.InvoiceService;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 import com.itextpdf.layout.Document;
@@ -15,6 +21,7 @@ import com.itextpdf.layout.Document;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -223,6 +230,53 @@ public class InvoiceServiceImpl implements InvoiceService {
         serviceTable.addCell(new Cell().add(new Paragraph(service.getPrice().toString())));
 
         document.add(serviceTable);
+
+        document.add(new Paragraph("\n"));
+
+        // --- Thông tin Khách hàng ---
+        Customer customer = invoice.getBooking().getCustomer();
+        Paragraph customerTitle = new Paragraph("Customer Details")
+                .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
+                .setFontSize(14);
+        document.add(customerTitle);
+
+        Table customerTable = new Table(2);
+        customerTable.addCell(new Cell().add(new Paragraph("Customer ID")));
+        customerTable.addCell(new Cell().add(new Paragraph(String.valueOf(customer.getCustomerId()))));
+
+        customerTable.addCell(new Cell().add(new Paragraph("Name")));
+        customerTable.addCell(new Cell().add(new Paragraph(customer.getName())));
+
+        customerTable.addCell(new Cell().add(new Paragraph("Email")));
+        customerTable.addCell(new Cell().add(new Paragraph(customer.getEmail())));
+
+        customerTable.addCell(new Cell().add(new Paragraph("Phone")));
+        customerTable.addCell(new Cell().add(new Paragraph(customer.getPhone())));
+
+// thêm các trường khác nếu cần
+        document.add(customerTable);
+
+        document.add(new Paragraph("\n"));
+
+// --- Thông tin Nhân viên ---
+        Employee employee = invoice.getBooking().getEmployee();
+        Paragraph employeeTitle = new Paragraph("Employee Details")
+                .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
+                .setFontSize(14);
+        document.add(employeeTitle);
+
+        Table employeeTable = new Table(2);
+        employeeTable.addCell(new Cell().add(new Paragraph("Employee ID")));
+        employeeTable.addCell(new Cell().add(new Paragraph(String.valueOf(employee.getEmployeeId()))));
+
+        employeeTable.addCell(new Cell().add(new Paragraph("Name")));
+        employeeTable.addCell(new Cell().add(new Paragraph(employee.getName())));
+
+        employeeTable.addCell(new Cell().add(new Paragraph("Email")));
+        employeeTable.addCell(new Cell().add(new Paragraph(employee.getEmail())));
+
+// thêm các trường khác nếu cần
+        document.add(employeeTable);
 
         document.add(new Paragraph("\n"));
 
