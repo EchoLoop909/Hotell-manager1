@@ -28,4 +28,15 @@ public class RoomTypeController {
     public ResponseEntity<?> createRoomType(@RequestBody RoomTypeDto roomTypeDto){
         return roomTypeService.create(roomTypeDto);
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateRoomType(@PathVariable Integer id,
+                                            @RequestBody RoomTypeDto roomTypeDto) {
+        return roomTypeService.updateRoomType(id, roomTypeDto);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteRoomType(@PathVariable Integer id) {
+        return roomTypeService.deleteRoomType(id);
+    }
 }

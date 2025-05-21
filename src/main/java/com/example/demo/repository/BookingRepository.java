@@ -1,7 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.model.entity.Booking;
-import com.example.demo.model.entity.Customer;
+import com.example.demo.model.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -16,5 +16,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     Optional<Booking> findByBookingId(Integer id);
 
-    List<Booking> findByCustomer(Customer customer);
+    List<Booking> findByEmployee(Optional<Employee> employee);
+
+
 }

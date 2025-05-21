@@ -70,4 +70,41 @@ public class RoomTypeServiceIpml implements RoomTypeService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @Override
+    public ResponseEntity<?> updateRoomType(Integer id, RoomTypeDto roomTypeDto) {
+        try {
+            Optional<RoomType> opt = roomTypeRepository.findById(id);
+            if (opt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RoomType không tồn tại");
+            }
+
+            RoomType roomType = opt.get();
+            roomType.setName(roomTypeDto.getName());
+            roomType.setCapacity(roomTypeDto.getCapacity());
+            roomType.setDefaultPrice(roomTypeDto.getDefaultPrice());
+            roomType.setDescription(roomTypeDto.getDescription());
+
+            roomTypeRepository.save(roomType);
+            return ResponseEntity.ok("UPDATE RoomType OK");
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật RoomType: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteRoomType(Integer id) {
+        try {
+            Optional<RoomType> opt = roomTypeRepository.findById(id);
+            if (opt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RoomType không tồn tại");
+            }
+
+            roomTypeRepository.deleteById(id);
+            return ResponseEntity.ok("DELETE RoomType OK");
+        } catch (Exception e) {
+            logger.error("Lỗi khi xóa RoomType: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
+        }
+    }
 }

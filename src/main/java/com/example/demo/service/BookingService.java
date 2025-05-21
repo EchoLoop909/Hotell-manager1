@@ -7,4 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface BookingService {
     ResponseEntity<?> createBooking(BookingDto bookingDto);
+
+    ResponseEntity<?> cancelBooking(Integer id);
 }

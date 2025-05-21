@@ -17,4 +17,9 @@ public class BookingController {
     public ResponseEntity<?> createBooking(@RequestBody BookingDto bookingDto) {
         return bookingService.createBooking(bookingDto);
     }
+
+    @PostMapping("/CancelbookingRoom")
+    public ResponseEntity<?> cancelBooking(@RequestParam Integer id) {
+        return bookingService.cancelBooking(id);
+    }
 }

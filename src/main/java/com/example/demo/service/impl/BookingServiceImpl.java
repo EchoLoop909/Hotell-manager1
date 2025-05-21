@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -132,4 +133,34 @@ public class BookingServiceImpl implements BookingService {
             throw e; // Ném lại ngoại lệ để rollback
         }
     }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<?> cancelBooking(Integer id) {
+        try {
+            Optional<Booking> bookingOpt = bookingRepository.findById(id);
+            if (bookingOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Không tìm thấy booking với ID = " + id);
+            }
+
+            Booking booking = bookingOpt.get();
+
+            // Cập nhật trạng thái booking sang đã_hủy
+            booking.setStatus(Booking.BookingStatus.ĐÃ_HỦY);
+
+            // Cập nhật trạng thái phòng sang trống (hoặc trạng thái phù hợp)
+            Room room = booking.getRoom();
+            room.setStatus(RoomStatus.trống); // Giả sử TRONG là trạng thái phòng trống
+            roomRepository.save(room);
+
+            bookingRepository.save(booking);
+
+            return ResponseEntity.ok("Hủy đặt phòng thành công");
+        } catch (Exception e) {
+            logger.error("Lỗi khi hủy booking: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
 }

@@ -11,4 +11,8 @@ public interface RoomTypeService {
     ResponseEntity<?> searchRoom(Integer capacity, String name, String description, BigDecimal minPrice,BigDecimal maxPrice );
 
     ResponseEntity<?> create(RoomTypeDto roomTypeDto);
+
+    ResponseEntity<?> updateRoomType(Integer id, RoomTypeDto roomTypeDto);
+
+    ResponseEntity<?> deleteRoomType(Integer id);
 }

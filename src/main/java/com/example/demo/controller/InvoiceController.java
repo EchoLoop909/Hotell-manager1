@@ -2,9 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.model.InvoiceDto;
 import com.example.demo.service.InvoiceService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -46,5 +50,10 @@ public class InvoiceController {
     public ResponseEntity<List<InvoiceDto>> getAll() {
         List<InvoiceDto> list = invoiceService.getAllInvoices();
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/export/{id}")
+    public void exportInvoicePdf(@PathVariable Integer id, HttpServletResponse response) throws IOException {
+        invoiceService.exportInvoicePdfById(response, id);
     }
 }
