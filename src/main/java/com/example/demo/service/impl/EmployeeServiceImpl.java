@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,130 +25,120 @@ public class EmployeeServiceImpl implements EmployeeService {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceImpl.class);
 
     private final EmployeeRepository employeeRepository;
-    private final PasswordEncoder passwordEncoder;
     private final BookingRepository bookingRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public ResponseEntity<?> createEmployee(EmployeeDto dto) {
-        logger.info("Tạo nhân viên: {}", dto.getEmail());
+    public Employee createEmployee(EmployeeDto dto) {
+        String roleStr = dto.getEmployeeRole();
 
-        Optional<Employee> existing = employeeRepository.findByEmail(dto.getEmail());
-        if (existing.isPresent()) {
-            logger.warn("Email đã tồn tại: {}", dto.getEmail());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email đã tồn tại");
+        if (roleStr == null || roleStr.isBlank()) {
+            throw new IllegalArgumentException("Employee role must not be null or empty");
         }
 
+        Employee.EmployeeRole role;
         try {
-            Employee emp = new Employee();
-            emp.setEmail(dto.getEmail());
-            emp.setName(dto.getName());
-            emp.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-            if (dto.getEmployeeRole() == null) {
-                throw new IllegalArgumentException("Employee role must not be null");
-            }
-
-            String normalizedRole = dto.getEmployeeRole().trim().toUpperCase().replace(" ", "_");
-            emp.setEmployeeRole(Employee.EmployeeRole.valueOf(normalizedRole));
-
-            Employee savedEmployee = employeeRepository.save(emp);
-            logger.info("Nhân viên đã được tạo: {}", savedEmployee.getEmail());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Nhân viên đã được tạo");
-
+            role = Employee.EmployeeRole.valueOf(roleStr.trim().toUpperCase().replace(" ", "_"));
         } catch (IllegalArgumentException e) {
-            logger.error("Vai trò không hợp lệ: {}", dto.getEmployeeRole(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Vai trò không hợp lệ");
-        } catch (Exception e) {
-            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
+            throw new IllegalArgumentException("Vai trò không hợp lệ: " + roleStr);
         }
+
+        Employee employee = new Employee();
+        employee.setName(dto.getName());
+        employee.setEmail(dto.getEmail());
+        employee.setPassword(passwordEncoder.encode(dto.getPassword()));
+        employee.setEmployeeRole(role);
+
+        return employeeRepository.save(employee);
     }
 
     @Override
     public ResponseEntity<?> getEmployee(Integer id) {
-        try {
-            Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-            if (optionalEmployee.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
-            }
+        return employeeRepository.findById(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại"));
+    }
 
-            return ResponseEntity.ok(optionalEmployee.get());
+
+    @Override
+    public ResponseEntity<?> getAllEmployees() {
+        try {
+            List<EmployeeDto> dtos = employeeRepository.findAll()
+                    .stream()
+                    .map(e -> new EmployeeDto(e.getEmployeeId(), e.getName(), e.getEmail(), e.getEmployeeRole()))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
+            logger.error("Lỗi lấy danh sách nhân viên: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching employees: " + e.getMessage());
         }
     }
 
     @Override
-    public ResponseEntity<?> deleteEmployee(Integer id) {
+    public ResponseEntity<?> searchEmployees(String name, String email, String role) {
+        // Nếu không có bộ lọc, trả về tất cả
+        if (name.isBlank() && email.isBlank() && role.isBlank()) {
+            return getAllEmployees();
+        }
         try {
-            Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-            if (optionalEmployee.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
+            Employee.EmployeeRole empRole = null;
+            if (!role.isBlank()) {
+                String norm = role.trim().toUpperCase().replace(" ", "_");
+                empRole = Employee.EmployeeRole.valueOf(norm);
             }
-
-            Employee employee = optionalEmployee.get();
-
-            List<Booking> bookings = bookingRepository.findByEmployee(Optional.of(employee));
-            for (Booking b : bookings) {
-                b.setEmployee(null);
+            List<Employee> list = employeeRepository.searchByNameEmailRole(
+                    name, email, empRole
+            );
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy nhân viên phù hợp");
             }
-
-            employeeRepository.deleteById(id);
-
-            return ResponseEntity.status(HttpStatus.OK).body("DELETE Employee OK");
+            return ResponseEntity.ok(list);
+        } catch (IllegalArgumentException e) {
+            logger.error("Vai trò không hợp lệ: {}", role, e);
+            return ResponseEntity.badRequest().body("Vai trò không hợp lệ");
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
+            logger.error("Lỗi tìm kiếm nhân viên: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
         }
     }
 
     @Override
     public ResponseEntity<?> updateEmployee(EmployeeDto dto, Integer id) {
+        Optional<Employee> opt = employeeRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
+        }
         try {
-            Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-            if (optionalEmployee.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
-            }
-
-            Employee emp = optionalEmployee.get();
-            emp.setEmail(dto.getEmail());
+            Employee emp = opt.get();
             emp.setName(dto.getName());
-            emp.setEmployeeRole(Employee.EmployeeRole.valueOf(dto.getEmployeeRole()));
+            emp.setEmail(dto.getEmail());
             emp.setPassword(passwordEncoder.encode(dto.getPassword()));
-
+            String norm = dto.getEmployeeRole().trim().toUpperCase().replace(" ", "_");
+            emp.setEmployeeRole(Employee.EmployeeRole.valueOf(norm));
             employeeRepository.save(emp);
-
-            return ResponseEntity.status(HttpStatus.OK).body("UPDATE Employee OK");
-
+            return ResponseEntity.ok("UPDATE Employee OK");
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
+            logger.error("Lỗi cập nhật nhân viên: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
         }
     }
 
     @Override
-    public ResponseEntity<?> searchEmployees(String name, String email, String role) {
+    public ResponseEntity<?> deleteEmployee(Integer id) {
+        Optional<Employee> opt = employeeRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
+        }
         try {
-            String normalizedRole = role.trim().toUpperCase().replace(" ", "_");
-            Employee.EmployeeRole employeeRole = Employee.EmployeeRole.valueOf(normalizedRole);
-
-            List<Employee> employees = employeeRepository.searchByNameEmailRole(name, email, employeeRole);
-
-            if (employees.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy nhân viên phù hợp");
-            }
-
-            return ResponseEntity.ok(employees);
-
-        } catch (IllegalArgumentException e) {
-            logger.error("Vai trò không hợp lệ: {}", role, e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Vai trò không hợp lệ");
+            Employee emp = opt.get();
+            bookingRepository.findByEmployee(Optional.of(emp))
+                    .forEach(b -> b.setEmployee(null));
+            employeeRepository.deleteById(id);
+            return ResponseEntity.ok("DELETE Employee OK");
         } catch (Exception e) {
-            logger.error("Lỗi không mong muốn: {}", e.getMessage(), e);
+            logger.error("Lỗi xóa nhân viên: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
         }
     }
-
 }
