@@ -14,5 +14,5 @@ public interface InvoiceService {
     void deleteInvoice(Integer id);
     List<InvoiceDto> getAllInvoices();
 
-    void exportInvoicePdfById(HttpServletResponse response, Integer invoiceId) throws IOException;
+//    void exportInvoicePdfById(HttpServletResponse response, Integer invoiceId) throws IOException;
 }
