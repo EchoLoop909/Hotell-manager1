@@ -59,13 +59,17 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại"));
     }
 
-
     @Override
     public ResponseEntity<?> getAllEmployees() {
         try {
             List<EmployeeDto> dtos = employeeRepository.findAll()
                     .stream()
-                    .map(e -> new EmployeeDto(e.getEmployeeId(), e.getName(), e.getEmail(), e.getEmployeeRole()))
+                    .map(e -> new EmployeeDto(
+                            e.getEmployeeId(),  // map ID ở đây
+                            e.getName(),
+                            e.getEmail(),
+                            e.getEmployeeRole().name() // chuyển enum sang String
+                    ))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
@@ -77,7 +81,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public ResponseEntity<?> searchEmployees(String name, String email, String role) {
-        // Nếu không có bộ lọc, trả về tất cả
         if (name.isBlank() && email.isBlank() && role.isBlank()) {
             return getAllEmployees();
         }
@@ -87,13 +90,21 @@ public class EmployeeServiceImpl implements EmployeeService {
                 String norm = role.trim().toUpperCase().replace(" ", "_");
                 empRole = Employee.EmployeeRole.valueOf(norm);
             }
-            List<Employee> list = employeeRepository.searchByNameEmailRole(
-                    name, email, empRole
-            );
+            List<Employee> list = employeeRepository.searchByNameEmailRole(name, email, empRole);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy nhân viên phù hợp");
             }
-            return ResponseEntity.ok(list);
+
+            List<EmployeeDto> dtos = list.stream()
+                    .map(e -> new EmployeeDto(
+                            e.getEmployeeId(),
+                            e.getName(),
+                            e.getEmail(),
+                            e.getEmployeeRole().name()
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtos);
         } catch (IllegalArgumentException e) {
             logger.error("Vai trò không hợp lệ: {}", role, e);
             return ResponseEntity.badRequest().body("Vai trò không hợp lệ");

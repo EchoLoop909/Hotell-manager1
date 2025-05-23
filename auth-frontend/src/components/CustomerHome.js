@@ -11,7 +11,7 @@ const CustomerHome = () => {
     const userRole = localStorage.getItem('user_role');
 
     const API = axios.create({
-        baseURL: 'http://localhost:9999/api/v1',
+        baseURL: 'http://localhost:8888/api/v1',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,

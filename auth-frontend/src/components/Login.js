@@ -17,7 +17,7 @@ const Login = () => {
         setMessage('');
 
         try {
-            const response = await axios.post('http://localhost:9999/api/v1/auth/authenticate', {
+            const response = await axios.post('http://localhost:8888/api/v1/auth/authenticate', {
                 email,
                 password,
             });
