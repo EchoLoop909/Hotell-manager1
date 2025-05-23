@@ -1,6 +1,5 @@
-// frontend/src/components/Login.js
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Thêm Link
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/styles.css';
 
@@ -55,36 +54,42 @@ const Login = () => {
     };
 
     return (
-        <div className="component-container login-container">
-            <h2>Đăng nhập</h2>
-            <form onSubmit={handleLogin} className="login-form">
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Đang xử lý...' : 'Đăng nhập'}
-                </button>
-            </form>
-            {message && (
-                <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
-                    {message}
+        <>
+            <nav className="navbar">
+                <div className="navbar-brand">Employee Management</div>
+            </nav>
+            <div className="component-container login-container">
+                <h2>Đăng nhập</h2>
+                {message && (
+                    <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
+                        {message}
+                    </p>
+                )}
+                {loading && <div className="loader"></div>}
+                <form onSubmit={handleLogin} className="login-form">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Mật khẩu"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                    </button>
+                </form>
+                <p>
+                    Chưa có tài khoản? <Link to="/register" className="register-link">Đăng ký</Link>
                 </p>
-            )}
-            <p>
-                Chưa có tài khoản? <Link to="/register" style={{ color: 'red' }}>Đăng ký</Link>
-            </p>
-        </div>
+            </div>
+        </>
     );
 };
 

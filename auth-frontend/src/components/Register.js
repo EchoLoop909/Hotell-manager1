@@ -1,6 +1,7 @@
 // frontend/src/components/Register.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/styles.css';
 
 const Register = () => {
@@ -18,12 +19,12 @@ const Register = () => {
         setMessage('');
 
         try {
-            // const response = await axios.post('http://localhost:8888/api/v1/auth/register', {
-            //     name,
-            //     phone,
-            //     email,
-            //     password,
-            // });
+            const response = await axios.post('http://localhost:8888/api/v1/auth/register', {
+                name,
+                phone,
+                email,
+                password,
+            });
 
             setMessage('Đăng ký thành công! Vui lòng đăng nhập.');
             setName('');

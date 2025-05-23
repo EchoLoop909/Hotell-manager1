@@ -50,7 +50,7 @@ body {
   cursor: not-allowed;
 }
 
-.home-container {
+.component-container {
   max-width: 1200px;
   margin: 20px auto;
   padding: 20px;
@@ -59,9 +59,15 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.login-container {
+  max-width: 400px;
+  margin: 40px auto;
+}
+
 h2, h3 {
   color: #e0e0e0;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .message {
@@ -96,30 +102,30 @@ h2, h3 {
   100% { transform: rotate(360deg); }
 }
 
-.employee-form, .search-form {
+.employee-form, .search-form, .login-form {
   display: flex;
+  flex-direction: column;
   gap: 15px;
   margin: 20px 0;
-  flex-wrap: wrap;
 }
 
 .employee-form input, .employee-form select,
-.search-form input, .search-form select {
+.search-form input, .search-form select,
+.login-form input {
   padding: 10px;
   border: none;
   border-radius: 4px;
   background-color: #333;
   color: #e0e0e0;
-  flex: 1;
-  min-width: 200px;
 }
 
 .employee-form input::placeholder,
-.search-form input::placeholder {
+.search-form input::placeholder,
+.login-form input::placeholder {
   color: #999;
 }
 
-.employee-form button, .search-form button {
+.employee-form button, .search-form button, .login-form button {
   background-color: #bb86fc;
   color: white;
   border: none;
@@ -129,11 +135,11 @@ h2, h3 {
   transition: background-color 0.3s;
 }
 
-.employee-form button:hover, .search-form button:hover {
+.employee-form button:hover, .search-form button:hover, .login-form button:hover {
   background-color: #9c27b0;
 }
 
-.employee-form button:disabled, .search-form button:disabled {
+.employee-form button:disabled, .search-form button:disabled, .login-form button:disabled {
   background-color: #666;
   cursor: not-allowed;
 }
@@ -193,4 +199,15 @@ h2, h3 {
 .employee-table button:disabled {
   background-color: #666;
   cursor: not-allowed;
+}
+
+.register-link {
+  color: #bb86fc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.register-link:hover {
+  color: #9c27b0;
+  text-decoration: underline;
 }
