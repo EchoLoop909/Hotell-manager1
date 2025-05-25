@@ -1,351 +1,299 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../styles.css';
+import '../../styles/CustomerManagement.css';
 
 const CustomerManagement = () => {
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [customers, setCustomers] = useState([]);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchPerformed, setSearchPerformed] = useState(false);
-    const [customerForm, setCustomerForm] = useState({
-        name: '',
-        email: '',
-        password: '',
-        phone: ''
-    });
-    const [searchForm, setSearchForm] = useState({
-        name: '',
-        email: '',
-        phone: ''
-    });
-    const [editingCustomerId, setEditingCustomerId] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [editingId, setEditingId] = useState(null);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
-    const userName = localStorage.getItem('user_name');
-    const userRole = localStorage.getItem('user_role');
-    const isQuanLy = userRole === 'QUAN_LY';
+  const navigate = useNavigate();
+  const userName = localStorage.getItem('user_name');
+  const userRole = localStorage.getItem('user_role');
+  const isQuanLy = userRole === 'QUAN_LY';
+  const token = localStorage.getItem('access_token');
 
-    const customerAPI = axios.create({
-        baseURL: 'http://localhost:8888/api/v1/customers',
+  const fetchCustomers = useCallback(async () => {
+    if (!token) {
+      setMessage('Bạn cần đăng nhập lại');
+      return;
+    }
+    try {
+      setLoading(true);
+      const resp = await axios.get('http://localhost:8888/api/v1/customers', {
         headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`
-        }
-    });
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCustomers(resp.data);
+    } catch (err) {
+      setMessage('Lỗi khi lấy danh sách: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
-    const authAPI = axios.create({
-        baseURL: 'http://localhost:8888/api/v1/auth',
-        headers: { 'Content-Type': 'application/json' }
-    });
+  useEffect(() => {
+    if (isQuanLy) {
+      fetchCustomers();
+    } else {
+      setMessage('Bạn không có quyền truy cập trang này');
+      setTimeout(() => navigate('/'), 1000);
+    }
+  }, [fetchCustomers, isQuanLy, navigate]);
 
-    useEffect(() => {
-        if (!isQuanLy) {
-            setMessage('Bạn không có quyền truy cập trang này');
-            setTimeout(() => navigate('/login'), 1000);
-        }
-    }, [isQuanLy, navigate]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setLoading(true);
 
-    const fetchCustomers = useCallback(async () => {
-        setLoading(true);
-        setMessage('');
-        try {
-            const res = await customerAPI.get('');
-            setCustomers(res.data);
-            setSearchPerformed(false);
-            setSearchResults([]);
-        } catch (err) {
-            setMessage('Lỗi khi lấy danh sách khách hàng: ' + (err.response?.data || err.message));
-        } finally {
-            setLoading(false);
-        }
-    }, [customerAPI]);
-
-    useEffect(() => {
-        if (isQuanLy) fetchCustomers();
-    }, [fetchCustomers, isQuanLy]);
-
-    const handleCreateOrUpdate = async e => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage('');
-        const payload = {
-            name: customerForm.name,
-            email: customerForm.email,
-            password: customerForm.password,
-            phone: customerForm.phone
-        };
-        try {
-            if (editingCustomerId) {
-                await customerAPI.put(`/${editingCustomerId}`, payload);
-                setMessage('Cập nhật khách hàng thành công');
-                setEditingCustomerId(null);
-            } else {
-                await customerAPI.post('/add', payload);
-                setMessage('Thêm khách hàng thành công');
-            }
-            fetchCustomers();
-            setCustomerForm({ name: '', email: '', password: '', phone: '' });
-        } catch (err) {
-            setMessage('Lỗi: ' + (err.response?.data || err.message));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async id => {
-        if (!id) {
-            alert('ID không hợp lệ!');
-            return;
-        }
-        if (!window.confirm('Xác nhận xóa khách hàng?')) return;
-
-        setLoading(true);
-        setMessage('');
-        try {
-            await customerAPI.delete(`/delete/${id}`);
-            setMessage('Xóa khách hàng thành công');
-            if (searchPerformed) {
-                await handleSearch(null, true);
-            } else {
-                fetchCustomers();
-            }
-        } catch (err) {
-            setMessage('Lỗi: ' + (err.response?.data || err.message));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleEdit = customer => {
-        setEditingCustomerId(customer.customerId);
-        setCustomerForm({
-            name: customer.name,
-            email: customer.email,
-            password: '',
-            phone: customer.phone
-        });
-    };
-
-    const handleSearch = async (e, isInternal = false) => {
-        if (e) e.preventDefault();
-        if (!isInternal) {
-            setLoading(true);
-            setMessage('');
-        }
-        try {
-            const res = await customerAPI.get('', { params: searchForm });
-            setSearchResults(res.data);
-            setSearchPerformed(true);
-            setMessage('Tìm kiếm thành công');
-        } catch (err) {
-            setMessage('Lỗi tìm kiếm: ' + (err.response?.data || err.message));
-        } finally {
-            if (!isInternal) setLoading(false);
-        }
-    };
-
-    const handleLogout = async () => {
-        setLoading(true);
-        try {
-            const refreshToken = localStorage.getItem('refresh_token');
-            await authAPI.post('/logout', { refreshToken });
-        } catch {
-            // ignore
-        } finally {
-            localStorage.clear();
-            navigate('/login');
-        }
-    };
-
-    if (!isQuanLy) {
-        return <p className="message error">{message}</p>;
+    const payload = { ...form };
+    if (editingId && !form.password) {
+      delete payload.password;
     }
 
-    return (
-        <>
-            <nav className="navbar">
-                <div className="navbar-brand">Hotel Management</div>
-                <ul className="navbar-menu">
-                    <li>
-                        <NavLink
-                            to="/employees"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý nhân viên
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/customers"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý khách hàng
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/rooms"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý phòng
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/invoices"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý hóa đơn
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/services"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý dịch vụ
-                        </NavLink>
-                    </li>
-                </ul>
-                <div className="navbar-user">
-                    <span>Xin chào, {userName} ({userRole})</span>
-                    <button className="logout-btn" onClick={handleLogout} disabled={loading}>
-                        Đăng xuất
+    try {
+      if (editingId) {
+        await axios.put(`http://localhost:8888/api/v1/customers/${editingId}`, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setMessage('Cập nhật khách hàng thành công');
+      } else {
+        await axios.post('http://localhost:8888/api/v1/customers/add', payload, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setMessage('Thêm khách hàng thành công');
+      }
+      setForm({ name: '', email: '', phone: '', password: '' });
+      setEditingId(null);
+      fetchCustomers();
+    } catch (err) {
+      setMessage('Lỗi: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (cust) => {
+    setEditingId(cust.customerId);
+    setForm({ name: cust.name, email: cust.email, phone: cust.phone, password: '' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Xác nhận xóa?')) return;
+    setLoading(true);
+    try {
+      await axios.delete(`http://localhost:8888/api/v1/customers/delete/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMessage('Xóa thành công');
+      fetchCustomers();
+    } catch (err) {
+      setMessage('Lỗi: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      await axios.post('http://localhost:8888/api/v1/auth/logout', { refreshToken }, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch {}
+    localStorage.clear();
+    navigate('/');
+  };
+
+  if (!isQuanLy) {
+    return <p className="message error">{message}</p>;
+  }
+
+  return (
+    <>
+      <nav className="navbar">
+        <div className="navbar-brand">Hotel Management</div>
+        <ul className="navbar-menu">
+          <li>
+            <NavLink to="/employees" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý nhân viên
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/customers" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý khách hàng
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/rooms" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý phòng
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/room-types" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý kiểu phòng
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/invoices" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý hóa đơn
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/services" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Quản lý dịch vụ
+            </NavLink>
+          </li>
+        </ul>
+        <div className="navbar-user">
+          <span>Xin chào, {userName} ({userRole})</span>
+          <button className="logout-btn" onClick={handleLogout} disabled={loading}>Đăng xuất</button>
+        </div>
+      </nav>
+
+      <div className="container">
+        <h2>Quản lý khách hàng</h2>
+        {message && (
+          <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
+            {message}
+          </p>
+        )}
+        {loading && <div className="loader"></div>}
+
+        <form onSubmit={handleSubmit} className="form" autoComplete="off">
+          <div className="form-group">
+            <label htmlFor="name">Họ tên <span className="required">*</span></label>
+            <input
+              id="name"
+              name="name"
+              placeholder="Họ tên"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email <span className="required">*</span></label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="phone">Số điện thoại <span className="required">*</span></label>
+            <input
+              id="phone"
+              name="phone"
+              placeholder="Số điện thoại"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">
+              Mật khẩu {editingId ? '(Để trống nếu không đổi)' : <span className="required">*</span>}
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Mật khẩu"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required={!editingId}
+              autoComplete={editingId ? "new-password" : "current-password"}
+            />
+          </div>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {editingId ? 'Cập nhật' : 'Tạo mới'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  setEditingId(null);
+                  setForm({ name: '', email: '', phone: '', password: '' });
+                  setMessage('');
+                }}
+                disabled={loading}
+              >
+                Hủy
+              </button>
+            )}
+          </div>
+        </form>
+
+        <h3>Danh sách khách hàng</h3>
+        <table className="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Số điện thoại</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {customers.length > 0 ? (
+              customers.map((c) => (
+                <tr key={c.customerId}>
+                  <td>{c.name}</td>
+                  <td>{c.email}</td>
+                  <td>{c.phone}</td>
+                  <td>
+                    <button
+                      className="btn-edit"
+                      onClick={() => handleEdit(c)}
+                      disabled={loading}
+                      type="button"
+                    >
+                      Sửa
                     </button>
-                </div>
-            </nav>
-            <div className="home-container">
-                <h2>Quản lý khách hàng</h2>
-                {message && <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</p>}
-                {loading && <div className="loader"></div>}
-
-                <form onSubmit={handleCreateOrUpdate} className="employee-form">
-                    <input
-                        name="name"
-                        placeholder="Họ tên"
-                        value={customerForm.name}
-                        onChange={e => setCustomerForm({ ...customerForm, name: e.target.value })}
-                        required
-                    />
-                    <input
-                        name="email"
-                        type="email"
-                        placeholder="Email"
-                        value={customerForm.email}
-                        onChange={e => setCustomerForm({ ...customerForm, email: e.target.value })}
-                        required
-                    />
-                    <input
-                        name="password"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        value={customerForm.password}
-                        onChange={e => setCustomerForm({ ...customerForm, password: e.target.value })}
-                        required={!editingCustomerId}
-                    />
-                    <input
-                        name="phone"
-                        placeholder="Số điện thoại"
-                        value={customerForm.phone}
-                        onChange={e => setCustomerForm({ ...customerForm, phone: e.target.value })}
-                        required
-                    />
-                    <button type="submit" disabled={loading}>
-                        {editingCustomerId ? 'Cập nhật' : 'Thêm mới'}
+                    <button
+                      className="btn-delete"
+                      onClick={() => handleDelete(c.customerId)}
+                      disabled={loading}
+                      type="button"
+                    >
+                      Xóa
                     </button>
-                </form>
-
-                <form onSubmit={handleSearch} className="search-form">
-                    <input
-                        name="name"
-                        placeholder="Tên"
-                        value={searchForm.name}
-                        onChange={e => setSearchForm({ ...searchForm, name: e.target.value })}
-                    />
-                    <input
-                        name="email"
-                        placeholder="Email"
-                        value={searchForm.email}
-                        onChange={e => setSearchForm({ ...searchForm, email: e.target.value })}
-                    />
-                    <input
-                        name="phone"
-                        placeholder="Số điện thoại"
-                        value={searchForm.phone}
-                        onChange={e => setSearchForm({ ...searchForm, phone: e.target.value })}
-                    />
-                    <button type="submit" disabled={loading}>Tìm kiếm</button>
-                </form>
-
-                <h3>Danh sách khách hàng</h3>
-                <table className="employee-table">
-                    <thead>
-                    <tr>
-                        <th>Họ tên</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {customers.map(customer => (
-                        <tr key={customer.customerId}>
-                            <td>{customer.name}</td>
-                            <td>{customer.email}</td>
-                            <td>{customer.phone}</td>
-                            <td>
-                                <button onClick={() => handleEdit(customer)} disabled={loading}>Sửa</button>
-                                <button onClick={() => handleDelete(customer.customerId)} disabled={loading}>Xóa</button>
-                            </td>
-                        </tr>
-                    ))}
-                    {customers.length === 0 && (
-                        <tr>
-                            <td colSpan={4} style={{ textAlign: 'center' }}>Không có khách hàng nào</td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-
-                {searchPerformed && (
-                    <>
-                        <h3>Kết quả tìm kiếm</h3>
-                        <table className="employee-table">
-                            <thead>
-                            <tr>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Số điện thoại</th>
-                                <th>Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {searchResults.length > 0 ? (
-                                searchResults.map(customer => (
-                                    <tr key={customer.customerId}>
-                                        <td>{customer.name}</td>
-                                        <td>{customer.email}</td>
-                                        <td>{customer.phone}</td>
-                                        <td>
-                                            <button onClick={() => handleEdit(customer)} disabled={loading}>Sửa</button>
-                                            <button onClick={() => handleDelete(customer.customerId)} disabled={loading}>Xóa</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={4} style={{ textAlign: 'center' }}>Không tìm thấy khách hàng phù hợp</td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </>
-                )}
-            </div>
-        </>
-    );
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} style={{ textAlign: 'center' }}>
+                  Không có khách hàng nào
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
 };
 
 export default CustomerManagement;

@@ -13,5 +13,6 @@ public class InvoiceDto {
     private BigDecimal totalAmount;
     private String paymentMethod;
     private String status;
+
     private LocalDateTime paymentDate;
 }

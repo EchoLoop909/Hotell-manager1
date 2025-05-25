@@ -1,240 +1,339 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../../styles.css';
+import { NavLink, useNavigate } from 'react-router-dom';
+import '../../styles/InvoiceManagement.css';
 
 const InvoiceManagement = () => {
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [invoices, setInvoices] = useState([]);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchPerformed, setSearchPerformed] = useState(false);
-    const [searchForm, setSearchForm] = useState({
-        customerName: '',
-        status: '',
-        paymentMethod: ''
-    });
+  const [invoices, setInvoices] = useState([]);
+  const [form, setForm] = useState({
+    bookingId: '',
+    serviceId: '',
+    paymentMethod: 'VNPay',
+    status: 'chưa_thanh_toán',
+    paymentDate: ''
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-    const navigate = useNavigate();
-    const userName = localStorage.getItem('user_name');
-    const userRole = localStorage.getItem('user_role');
-    const isQuanLy = userRole === 'QUAN_LY';
+  const navigate = useNavigate();
+  const userName = localStorage.getItem('user_name');
+  const userRole = localStorage.getItem('user_role');
+  const isQuanLy = userRole === 'QUAN_LY';
 
-    const authAPI = axios.create({
-        baseURL: 'http://localhost:8888/api/v1/auth',
-        headers: { 'Content-Type': 'application/json' }
-    });
-
-    const invoiceAPI = axios.create({
-        baseURL: 'http://localhost:8888/api/v1/invoices',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`
-        }
-    });
-
-    useEffect(() => {
-        if (!isQuanLy) {
-            setMessage('Bạn không có quyền truy cập trang này');
-            setTimeout(() => navigate('/login'), 1000);
-        }
-    }, [isQuanLy, navigate]);
-
-    const fetchInvoices = useCallback(async () => {
-        try {
-            const res = await invoiceAPI.get('/search', { params: {} });
-            setInvoices(res.data);
-            setSearchPerformed(false);
-            setSearchResults([]);
-        } catch (err) {
-            setMessage('Lỗi khi lấy danh sách: ' + (err.response?.data || err.message));
-        }
-    }, [invoiceAPI]);
-
-    useEffect(() => {
-        if (isQuanLy) fetchInvoices();
-    }, [fetchInvoices, isQuanLy]);
-
-    const handleSearch = async (e, isInternal = false) => {
-        if (e) e.preventDefault();
-        if (!isInternal) {
-            setLoading(true);
-            setMessage('');
-        }
-        try {
-            const res = await invoiceAPI.get('/search', { params: searchForm });
-            setSearchResults(res.data);
-            setSearchPerformed(true);
-            setMessage('Tìm kiếm thành công');
-        } catch (err) {
-            setMessage('Lỗi tìm kiếm: ' + (err.response?.data || err.message));
-        } finally {
-            if (!isInternal) setLoading(false);
-        }
-    };
-
-    const handleLogout = async () => {
-        setLoading(true);
-        try {
-            const refreshToken = localStorage.getItem('refresh_token');
-            await authAPI.post('/logout', { refreshToken });
-        } catch {
-            // ignore
-        } finally {
-            localStorage.clear();
-            navigate('/login');
-        }
-    };
-
-    if (!isQuanLy) {
-        return <p className="message error">{message}</p>;
+  const token = localStorage.getItem('access_token') || '';
+  const api = axios.create({
+    baseURL: 'http://localhost:8888/api/v1/invoices',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
     }
+  });
 
-    return (
-        <>
-            <nav className="navbar">
-                <div className="navbar-brand">Hotel Management</div>
-                <ul className="navbar-menu">
-                    <li>
-                        <NavLink
-                            to="/employees"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý nhân viên
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/customers"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý khách hàng
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/rooms"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý phòng
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/invoices"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý hóa đơn
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/services"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quản lý dịch vụ
-                        </NavLink>
-                    </li>
-                </ul>
-                <div className="navbar-user">
-                    <span>Xin chào, {userName} ({userRole})</span>
-                    <button className="logout-btn" onClick={handleLogout} disabled={loading}>
-                        Đăng xuất
-                    </button>
-                </div>
-            </nav>
-            <div className="home-container">
-                <h2>Quản lý hóa đơn</h2>
-                {message && <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</p>}
-                {loading && <div className="loader"></div>}
+  const loadInvoices = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get();
+      setInvoices(res.data);
+      setMessage('');
+    } catch (err) {
+      setMessage('Lỗi tải hóa đơn. Vui lòng đăng nhập lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                <form onSubmit={handleSearch} className="search-form">
-                    <input
-                        name="customerName"
-                        placeholder="Tên khách hàng"
-                        value={searchForm.customerName}
-                        onChange={e => setSearchForm({ ...searchForm, customerName: e.target.value })}
-                    />
-                    <input
-                        name="status"
-                        placeholder="Trạng thái (PENDING/PAID)"
-                        value={searchForm.status}
-                        onChange={e => setSearchForm({ ...searchForm, status: e.target.value })}
-                    />
-                    <input
-                        name="paymentMethod"
-                        placeholder="Phương thức thanh toán"
-                        value={searchForm.paymentMethod}
-                        onChange={e => setSearchForm({ ...searchForm, paymentMethod: e.target.value })}
-                    />
-                    <button type="submit" disabled={loading}>Tìm kiếm</button>
-                </form>
+  useEffect(() => {
+    if (isQuanLy) {
+      loadInvoices();
+    } else {
+      setMessage('Bạn không có quyền truy cập trang này');
+      setTimeout(() => navigate('/'), 1000);
+    }
+  }, [isQuanLy, navigate]);
 
-                <h3>Danh sách hóa đơn</h3>
-                <table className="employee-table">
-                    <thead>
-                        <tr>
-                            <th>ID Hóa đơn</th>
-                            <th>Khách hàng</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Phương thức thanh toán</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {invoices.map(inv => (
-                            <tr key={inv.id}>
-                                <td>{inv.id}</td>
-                                <td>{inv.customerName}</td>
-                                <td>{inv.totalAmount}</td>
-                                <td>{inv.status}</td>
-                                <td>{inv.paymentMethod}</td>
-                            </tr>
-                        ))}
-                        {invoices.length === 0 && (
-                            <tr>
-                                <td colSpan={5} style={{ textAlign: 'center' }}>Không có hóa đơn nào</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
 
-                {searchPerformed && (
-                    <>
-                        <h3>Kết quả tìm kiếm</h3>
-                        <table className="employee-table">
-                            <thead>
-                                <tr>
-                                    <th>ID Hóa đơn</th>
-                                    <th>Khách hàng</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th>Phương thức thanh toán</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {searchResults.length > 0 ? (
-                                    searchResults.map(inv => (
-                                        <tr key={inv.id}>
-                                            <td>{inv.id}</td>
-                                            <td>{inv.customerName}</td>
-                                            <td>{inv.totalAmount}</td>
-                                            <td>{inv.status}</td>
-                                            <td>{inv.paymentMethod}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={5} style={{ textAlign: 'center' }}>Không tìm thấy hóa đơn phù hợp</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </>
-                )}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    try {
+      const payload = {
+        bookingId: Number(form.bookingId),
+        serviceId: Number(form.serviceId),
+        paymentMethod: form.paymentMethod,
+        status: form.status,
+        paymentDate: form.paymentDate || null,
+      };
+      if (editingId == null) {
+        await api.post('/create', payload);
+        setMessage('Tạo hóa đơn thành công');
+      } else {
+        await api.put(`/${editingId}`, payload);
+        setMessage('Cập nhật hóa đơn thành công');
+      }
+      setForm({ bookingId: '', serviceId: '', paymentMethod: 'VNPay', status: 'chưa_thanh_toán', paymentDate: '' });
+      setEditingId(null);
+      loadInvoices();
+    } catch {
+      setMessage(editingId == null ? 'Lỗi tạo hóa đơn' : 'Lỗi cập nhật hóa đơn');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (inv) => {
+    setEditingId(inv.invoiceId);
+    setForm({
+      bookingId: inv.bookingId.toString(),
+      serviceId: inv.serviceId.toString(),
+      paymentMethod: inv.paymentMethod,
+      status: inv.status,
+      paymentDate: inv.paymentDate ? inv.paymentDate.substring(0,16) : ''
+    });
+    setMessage('');
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Bạn có chắc muốn xóa hóa đơn này?')) return;
+    setLoading(true);
+    setMessage('');
+    try {
+      await api.delete(`/${id}`);
+      setMessage('Xóa hóa đơn thành công');
+      loadInvoices();
+    } catch {
+      setMessage('Lỗi xóa hóa đơn');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportPdf = async (id) => {
+    setLoading(true);
+    setMessage('');
+    try {
+      const exportApi = axios.create({
+        baseURL: 'http://localhost:8888/api/v1/invoices',
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+
+      const response = await exportApi.get(`/export/${id}`);
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setMessage('Xuất hóa đơn thành công');
+    } catch (err) {
+      setMessage('Lỗi xuất hóa đơn');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const authAPI = axios.create({
+        baseURL: 'http://localhost:8888/api/v1/auth',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const refreshToken = localStorage.getItem('refresh_token');
+      await authAPI.post('/logout', { refreshToken });
+    } catch {
+      // ignore
+    } finally {
+      localStorage.clear();
+      navigate('/');
+    }
+  };
+
+  if (!isQuanLy) {
+    return <p className="message error">{message}</p>;
+  }
+
+  return (
+    <>
+      <nav className="navbar">
+        <div className="navbar-brand">Hotel Management</div>
+        <ul className="navbar-menu">
+          <li><NavLink to="/employees" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý nhân viên</NavLink></li>
+          <li><NavLink to="/customers" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý khách hàng</NavLink></li>
+          <li><NavLink to="/rooms" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý phòng</NavLink></li>
+          <li><NavLink to="/room-types" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý kiểu phòng</NavLink></li>
+          <li><NavLink to="/invoices" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý hóa đơn</NavLink></li>
+          <li><NavLink to="/services" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Quản lý dịch vụ</NavLink></li>
+        </ul>
+        <div className="navbar-user">
+          <span>Xin chào, <strong>{userName}</strong> ({userRole})</span>
+          <button className="logout-btn" onClick={handleLogout} disabled={loading}>Đăng xuất</button>
+        </div>
+      </nav>
+
+      <section className="container">
+        <header className="header">
+          <h1>Quản lý Hóa Đơn</h1>
+        </header>
+
+        {message && (
+          <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
+            {message}
+          </p>
+        )}
+        {loading && <div className="loader"></div>}
+
+        <section className="form-section">
+          <form onSubmit={handleSubmit} className="form">
+            <div className="form-group">
+              <label htmlFor="bookingId">Booking ID <span className="required">*</span></label>
+              <input
+                id="bookingId"
+                name="bookingId"
+                type="number"
+                placeholder="Booking ID"
+                value={form.bookingId}
+                onChange={handleChange}
+                required
+                min={1}
+              />
             </div>
-        </>
-    );
+            <div className="form-group">
+              <label htmlFor="serviceId">Service ID <span className="required">*</span></label>
+              <input
+                id="serviceId"
+                name="serviceId"
+                type="number"
+                placeholder="Service ID"
+                value={form.serviceId}
+                onChange={handleChange}
+                required
+                min={1}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="paymentMethod">Phương thức thanh toán</label>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={form.paymentMethod}
+                onChange={handleChange}
+              >
+                <option value="VNPay">VNPay</option>
+                <option value="Visa">Visa</option>
+                <option value="tại_quầy">Tại quầy</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="status">Trạng thái</label>
+              <select
+                id="status"
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+              >
+                <option value="chưa_thanh_toán">Chưa thanh toán</option>
+                <option value="đã_thanh_toán">Đã thanh toán</option>
+                <option value="đã_hủy">Đã hủy</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="paymentDate">Ngày thanh toán</label>
+              <input
+                id="paymentDate"
+                name="paymentDate"
+                type="datetime-local"
+                value={form.paymentDate}
+                onChange={handleChange}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {editingId == null ? 'Tạo mới' : 'Cập nhật'}
+            </button>
+            {editingId != null && (
+              <button type="button" className="btn btn-secondary" onClick={() => {
+                setEditingId(null);
+                setForm({ bookingId: '', serviceId: '', paymentMethod: 'VNPay', status: 'chưa_thanh_toán', paymentDate: '' });
+                setMessage('');
+              }} disabled={loading}>
+                Hủy
+              </button>
+            )}
+          </form>
+        </section>
+
+        <section className="table-section">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Service ID</th>
+                <th>Phương thức thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày thanh toán</th>
+                <th>Tổng tiền</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.length === 0 ? (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center' }}>Không có hóa đơn nào</td>
+                </tr>
+              ) : (
+                invoices.map(inv => (
+                  <tr key={inv.invoiceId}>
+                    <td>{inv.bookingId}</td>
+                    <td>{inv.serviceId}</td>
+                    <td>{inv.paymentMethod}</td>
+                    <td>{inv.status}</td>
+                    <td>{inv.paymentDate ? new Date(inv.paymentDate).toLocaleString() : ''}</td>
+                    <td>{inv.totalAmount != null
+                      ? inv.totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+                      : ''}</td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-warning"
+                        onClick={() => handleEdit(inv)}
+                        disabled={loading}
+                      >
+                        Sửa
+                      </button>{' '}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(inv.invoiceId)}
+                        disabled={loading}
+                      >
+                        Xóa
+                      </button>{' '}
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={() => handleExportPdf(inv.invoiceId)}
+                        disabled={loading}
+                      >
+                        Xuất
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </section>
+      </section>
+    </>
+  );
 };
 
 export default InvoiceManagement;

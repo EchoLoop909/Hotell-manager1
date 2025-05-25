@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Login from './Login';
 import Register from './Register';
-import '../styles/styles.css';
+import '../../styles/styles.css';
 export default function AuthPage({ onLogin }) {
     const [isLogin, setIsLogin] = useState(true);
     const toggleForm = () => setIsLogin(!isLogin);
