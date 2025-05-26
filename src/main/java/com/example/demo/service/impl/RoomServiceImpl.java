@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -216,4 +217,33 @@ public class RoomServiceImpl implements RoomService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    public ResponseEntity<List<RoomDto>> searchAvailableRooms(LocalDate checkIn, LocalDate checkOut, Integer roomTypeId) {
+        try {
+            if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
+                return ResponseEntity.badRequest().body(List.of());
+            }
+            List<Room> rooms = roomRepository.findAvailableRooms(checkIn, checkOut, roomTypeId);
+
+            List<RoomDto> dtos = rooms.stream().map(room -> {
+                RoomDto dto = new RoomDto();
+                dto.setRoomId(room.getRoomId());
+                dto.setSku(room.getSku());
+                dto.setTypeId(room.getType().getTypeId());
+                dto.setPrice(room.getPrice());
+                dto.setStatus(room.getStatus());
+                return dto;
+            }).collect(Collectors.toList());
+
+            if (dtos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(dtos);
+            }
+
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            logger.error("Lỗi tìm phòng trống: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
+        }
+    }
+
 }

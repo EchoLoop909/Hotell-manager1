@@ -31,17 +31,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+//                        hasAuthority("QUAN_LY")
                         .requestMatchers("/", "/register", "/error", "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/employees/**", "/employee", "/dashboard").hasAuthority("QUAN_LY")
+                        .requestMatchers("/api/v1/employees/**", "/employee", "/dashboard").permitAll()
                         .requestMatchers("/api/v1/customers/**", "/customers").permitAll()
-                        .requestMatchers("/home", "/bookings").hasAnyAuthority("QUAN_LY", "LE_TAN")
-                        .requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/authenticate").permitAll()
-                        .requestMatchers("//api/v1/rooms/**").hasAnyAuthority("QUAN_LY")
-                        .requestMatchers("/api/v1/roomType/**").hasAnyAuthority("QUAN_LY")
+                        .requestMatchers("/home", "/bookings").permitAll()
+                        .requestMatchers("/api/v1/auth/authenticate").permitAll() // Chỉ cần một lần, sửa trùng lặp
+                        .requestMatchers("/api/v1/rooms/**").permitAll()
+                        .requestMatchers("/api/v1/roomType/**").permitAll() // Đảm bảo khớp với endpoint
                         .requestMatchers("/api/bookings/**").permitAll()
                         .requestMatchers("/api/Service/**").permitAll()
                         .requestMatchers("/api/v1/invoices/**").permitAll()
                         .requestMatchers("/api/booking-services").permitAll()
+                        .requestMatchers("/api/v1/roomType/getall", "/api/v1/rooms/search").permitAll() // Đảm bảo đúng đường dẫn
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
@@ -49,18 +51,23 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("Unauthorized");
                         })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("Forbidden: Bạn không có quyền truy cập.");
+                        })
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));  // frontend origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Frontend origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);  // Nếu dùng cookie hoặc header authorization
+        configuration.setAllowCredentials(true); // Nếu dùng cookie hoặc header authorization
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomTypeServiceIpml implements RoomTypeService {
@@ -107,4 +108,26 @@ public class RoomTypeServiceIpml implements RoomTypeService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
         }
     }
+
+    @Override
+    public ResponseEntity<List<RoomTypeDto>> getAllRoomTypes() {
+        try {
+            List<RoomTypeDto> result = roomTypeRepository.findAll()
+                    .stream()
+                    .map(roomType -> {
+                        RoomTypeDto dto = new RoomTypeDto();
+                        dto.setName(roomType.getName());
+                        dto.setDescription(roomType.getDescription());
+                        dto.setCapacity(roomType.getCapacity());
+                        dto.setDefaultPrice(roomType.getDefaultPrice());
+                        dto.setTypeId(roomType.getTypeId());
+                        return dto;
+                    }).collect(Collectors.toList());
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy danh sách loại phòng: {}", e.getMessage(), e);
+            return new ResponseEntity<>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

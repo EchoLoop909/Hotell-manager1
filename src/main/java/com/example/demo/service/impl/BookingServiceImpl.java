@@ -134,33 +134,33 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @Override
-    @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<?> cancelBooking(Integer id) {
-        try {
-            Optional<Booking> bookingOpt = bookingRepository.findById(id);
-            if (bookingOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Không tìm thấy booking với ID = " + id);
-            }
-
-            Booking booking = bookingOpt.get();
-
-            // Cập nhật trạng thái booking sang đã_hủy
-            booking.setStatus(Booking.BookingStatus.ĐÃ_HỦY);
-
-            // Cập nhật trạng thái phòng sang trống (hoặc trạng thái phù hợp)
-            Room room = booking.getRoom();
-            room.setStatus(RoomStatus.trống); // Giả sử TRONG là trạng thái phòng trống
-            roomRepository.save(room);
-
-            bookingRepository.save(booking);
-
-            return ResponseEntity.ok("Hủy đặt phòng thành công");
-        } catch (Exception e) {
-            logger.error("Lỗi khi hủy booking: {}", e.getMessage(), e);
-            throw e;
+@Override
+@Transactional(rollbackOn = Exception.class)
+public ResponseEntity<?> cancelBooking(Integer id) {
+    try {
+        Optional<Booking> bookingOpt = bookingRepository.findById(id);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy booking với ID = " + id);
         }
+
+        Booking booking = bookingOpt.get();
+
+        // Lấy phòng để cập nhật trạng thái phòng về trống
+        Room room = booking.getRoom();
+        room.setStatus(RoomStatus.trống); // trạng thái phòng trống
+        roomRepository.save(room);
+
+        // Xóa booking khỏi DB
+        bookingRepository.delete(booking);
+
+        return ResponseEntity.ok("Hủy đặt phòng thành công và đã xóa dữ liệu đặt phòng");
+
+    } catch (Exception e) {
+        logger.error("Lỗi khi hủy booking: {}", e.getMessage(), e);
+        throw e;
     }
+}
+
 
 }

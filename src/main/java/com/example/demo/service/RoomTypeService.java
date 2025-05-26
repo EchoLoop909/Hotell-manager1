@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public interface RoomTypeService {
@@ -15,4 +16,6 @@ public interface RoomTypeService {
     ResponseEntity<?> updateRoomType(Integer id, RoomTypeDto roomTypeDto);
 
     ResponseEntity<?> deleteRoomType(Integer id);
+
+    ResponseEntity<List<RoomTypeDto>> getAllRoomTypes();
 }

@@ -4,14 +4,15 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './components/Login';
 import Register from './components/Register';
 import Home from './components/Home';
+import ReceptionistDashboard from './components/ReceptionistDashboard';
+import ReceptionistSearchRoom from './components/Employee/ReceptionistSearchRoom';
+import BookingForm from './components/Employee/BookingForm';
 import ReceptionistHome from './components/Admin/ReceptionistHome';
 import CustomerManagement from './components/Admin/CustomerManagement';
 import RoomManagement from './components/Admin/RoomManagement';
 import InvoiceManagement from './components/Admin/InvoiceManagement';
 import ServiceManagement from './components/Admin/ServiceManagement';
 import RoomTypeManagement from './components/Admin/RoomTypeManagement';
-
-import './styles/styles.css';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('user_role');
@@ -28,7 +29,6 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
         <Route
           path="/home"
           element={
@@ -37,33 +37,46 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/receptionist"
           element={
             <ProtectedRoute allowedRoles={['LE_TAN']}>
-              <ReceptionistHome />
+              <ReceptionistDashboard />
             </ProtectedRoute>
           }
         />
-
-       <Route
-         path="/rooms"
-         element={
-             <ProtectedRoute allowedRoles={['QUAN_LY']}>
-               <RoomManagement />
-             </ProtectedRoute>
-       }/>
-
-       <Route
-         path="/room-types"
-         element={
-           <ProtectedRoute allowedRoles={['QUAN_LY']}>
-             <RoomTypeManagement />
-           </ProtectedRoute>
-         }
-       />
-
+        <Route
+          path="/receptionist/search-room"
+          element={
+            <ProtectedRoute allowedRoles={['LE_TAN']}>
+              <ReceptionistSearchRoom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receptionist/book"
+          element={
+            <ProtectedRoute allowedRoles={['LE_TAN']}>
+              <BookingForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rooms"
+          element={
+            <ProtectedRoute allowedRoles={['QUAN_LY']}>
+              <RoomManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/room-types"
+          element={
+            <ProtectedRoute allowedRoles={['QUAN_LY']}>
+              <RoomTypeManagement />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/employees"
           element={
@@ -72,7 +85,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/customers"
           element={
@@ -81,7 +93,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/invoices"
           element={
@@ -90,7 +101,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/services"
           element={

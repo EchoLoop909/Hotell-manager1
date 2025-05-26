@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,5 +39,13 @@ public class RoomController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable int id) {
         return roomService.deleteRoom(id);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<RoomDto>> searchRooms(
+            @RequestParam LocalDate checkIn,
+            @RequestParam LocalDate checkOut,
+            @RequestParam(required = false) Integer roomTypeId) {
+        return roomService.searchAvailableRooms(checkIn, checkOut, roomTypeId);
     }
 }
