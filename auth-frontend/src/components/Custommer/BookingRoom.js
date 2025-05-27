@@ -17,11 +17,8 @@ const BookingRoom = () => {
   const [searchError, setSearchError] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // State cho khách hàng
-  const [customerId, setCustomerId] = useState('');
-  const [newCustomer, setNewCustomer] = useState({ fullName: '', email: '', phone: '' });
-  const [useExistingCustomer, setUseExistingCustomer] = useState(true);
-  const [customers, setCustomers] = useState([]);
+  // State khách hàng lấy từ API
+  const [currentCustomer, setCurrentCustomer] = useState(null);
   const [customerError, setCustomerError] = useState('');
 
   // State thanh toán
@@ -29,12 +26,12 @@ const BookingRoom = () => {
   const [paymentError, setPaymentError] = useState('');
 
   // State đặt phòng
-  const [employeeId, setEmployeeId] = useState(1); // giả định đang đăng nhập
+  const [employeeId, setEmployeeId] = useState(1); // giả định đang đăng nhập nhân viên
   const [bookingError, setBookingError] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Fetch dữ liệu ban đầu
+  // Lấy loại phòng + thông tin khách hàng hiện tại
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
@@ -45,17 +42,17 @@ const BookingRoom = () => {
       }
     };
 
-    const fetchCustomers = async () => {
+    const fetchCurrentCustomer = async () => {
       try {
-        const response = await axios.get('http://localhost:8888/api/v1/customers');
-        setCustomers(response.data);
+        const response = await axios.get('http://localhost:8888/api/v1/customers/me', { withCredentials: true });
+        setCurrentCustomer(response.data);
       } catch (err) {
-        setCustomerError('Không thể tải danh sách khách hàng');
+        setCustomerError('Không thể tải thông tin khách hàng hiện tại');
       }
     };
 
     fetchRoomTypes();
-    fetchCustomers();
+    fetchCurrentCustomer();
   }, []);
 
   // Tìm phòng trống
@@ -94,10 +91,6 @@ const BookingRoom = () => {
     }
   };
 
-  const handleNewCustomerChange = (e) => {
-    setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
-  };
-
   // Xử lý đặt phòng
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
@@ -105,44 +98,18 @@ const BookingRoom = () => {
     setBookingSuccess('');
     setPaymentError('');
     setBookingLoading(true);
+    setCustomerError('');
 
-    // Kiểm tra chọn phòng
     if (!selectedRoomId) {
       setBookingError('Vui lòng chọn một phòng');
       setBookingLoading(false);
       return;
     }
 
-    let finalCustomerId = customerId;
-
-    if (useExistingCustomer) {
-      if (!customerId) {
-        setCustomerError('Vui lòng chọn khách hàng');
-        setBookingLoading(false);
-        return;
-      }
-    } else {
-      const { fullName, email, phone } = newCustomer;
-      if (!fullName || !email || !phone) {
-        setCustomerError('Vui lòng nhập đầy đủ thông tin khách hàng');
-        setBookingLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.post('/api/v1/customers/add', {
-          fullName,
-          email,
-          phone,
-        });
-        const addedCustomer = await axios.get('/api/v1/customers');
-        const createdCustomer = addedCustomer.data.find(c => c.email === email && c.phone === phone);
-        finalCustomerId = createdCustomer?.customerId;
-      } catch (err) {
-        setCustomerError(err.response?.data || 'Lỗi khi tạo khách hàng mới');
-        setBookingLoading(false);
-        return;
-      }
+    if (!currentCustomer || !currentCustomer.customerId) {
+      setCustomerError('Không có thông tin khách hàng để đặt phòng');
+      setBookingLoading(false);
+      return;
     }
 
     // Thanh toán giả lập
@@ -162,25 +129,24 @@ const BookingRoom = () => {
       checkIn,
       checkOut,
       status: 'đã_xác_nhận',
-      customerId: finalCustomerId,
+      customerId: currentCustomer.customerId,
       employeeId,
       roomId: parseInt(selectedRoomId),
     };
 
     try {
-      const response = await axios.post('http://localhost:8888/api/bookings/bookingRoom', bookingDto);
-      setBookingSuccess(response.data);
-      console.log(`Gửi email xác nhận đến ${useExistingCustomer ? customers.find(c => c.customerId === parseInt(customerId))?.email : newCustomer.email}`);
+      await axios.post('http://localhost:8888/api/bookings/bookingRoom', bookingDto);
+      setBookingSuccess('Đặt phòng thành công!');
+
+      console.log(`Gửi email xác nhận đến ${currentCustomer.email}`);
       console.log('Đồng bộ với Booking.com/Agoda');
 
-      // Reset form
+      // Reset form tìm phòng
       setCheckIn('');
       setCheckOut('');
       setRoomTypeId('');
       setAvailableRooms([]);
       setSelectedRoomId('');
-      setCustomerId('');
-      setNewCustomer({ fullName: '', email: '', phone: '' });
       setPaymentMethod('counter');
     } catch (err) {
       setBookingError(err.response?.data || 'Lỗi khi tạo đặt phòng');
@@ -190,131 +156,134 @@ const BookingRoom = () => {
   };
 
   return (
-      <div className="booking-container">
-        <h1 className="booking-title">Đặt phòng</h1>
+    <div className="booking-container">
+      <h1 className="booking-title">Đặt phòng</h1>
 
-        {/* Tìm phòng */}
-        <section className="booking-section">
-          <h2 className="section-title">Tìm kiếm phòng trống</h2>
-          <form onSubmit={handleSearchRooms} className="search-form">
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Ngày check-in</label>
-                <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="form-input" />
-              </div>
-              <div className="form-group">
-                <label>Ngày check-out</label>
-                <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="form-input" />
-              </div>
-              <div className="form-group">
-                <label>Loại phòng</label>
-                <select value={roomTypeId} onChange={(e) => setRoomTypeId(e.target.value)} className="form-input">
-                  <option value="">Tất cả</option>
-                  {roomTypes.map((type) => (
-                      <option key={type.typeId} value={type.typeId}>
-                        {type.name} (Sức chứa: {type.capacity})
-                      </option>
-                  ))}
-                </select>
-              </div>
+      {/* Tìm phòng */}
+      <section className="booking-section">
+        <h2 className="section-title">Tìm kiếm phòng trống</h2>
+        <form onSubmit={handleSearchRooms} className="search-form">
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Ngày check-in</label>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className="form-input"
+              />
             </div>
-            <button type="submit" className="search-button" disabled={searchLoading}>
-              {searchLoading ? 'Đang tìm kiếm...' : 'Tìm kiếm phòng'}
-            </button>
-          </form>
-          {searchError && <div className="error-message">{searchError}</div>}
-          {availableRooms.length > 0 && (
-              <div className="results-table">
-                <h3 className="section-title">Phòng trống</h3>
-                <table>
-                  <thead>
-                  <tr>
-                    <th>Chọn</th>
-                    <th>Mã phòng</th>
-                    <th>Loại phòng</th>
-                    <th>Giá (VNĐ/đêm)</th>
-                    <th>Trạng thái</th>
+            <div className="form-group">
+              <label>Ngày check-out</label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>Loại phòng</label>
+              <select
+                value={roomTypeId}
+                onChange={(e) => setRoomTypeId(e.target.value)}
+                className="form-input"
+              >
+                <option value="">Tất cả</option>
+                {roomTypes.map((type) => (
+                  <option key={type.typeId} value={type.typeId}>
+                    {type.name} (Sức chứa: {type.capacity})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <button type="submit" className="search-button" disabled={searchLoading}>
+            {searchLoading ? 'Đang tìm kiếm...' : 'Tìm kiếm phòng'}
+          </button>
+        </form>
+        {searchError && <div className="error-message">{searchError}</div>}
+        {availableRooms.length > 0 && (
+          <div className="results-table">
+            <h3 className="section-title">Phòng trống</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Chọn</th>
+                  <th>Mã phòng</th>
+                  <th>Loại phòng</th>
+                  <th>Giá (VNĐ/đêm)</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {availableRooms.map((room) => (
+                  <tr key={room.roomId}>
+                    <td>
+                      <input
+                        type="radio"
+                        name="room"
+                        value={room.roomId}
+                        checked={selectedRoomId === room.roomId.toString()}
+                        onChange={(e) => setSelectedRoomId(e.target.value)}
+                      />
+                    </td>
+                    <td>{room.sku}</td>
+                    <td>{roomTypes.find((type) => type.typeId === room.typeId)?.name || 'N/A'}</td>
+                    <td>{room.price.toLocaleString('vi-VN')}</td>
+                    <td>{room.status}</td>
                   </tr>
-                  </thead>
-                  <tbody>
-                  {availableRooms.map((room) => (
-                      <tr key={room.roomId}>
-                        <td>
-                          <input type="radio" name="room" value={room.roomId} checked={selectedRoomId === room.roomId.toString()} onChange={(e) => setSelectedRoomId(e.target.value)} />
-                        </td>
-                        <td>{room.sku}</td>
-                        <td>{roomTypes.find((type) => type.typeId === room.typeId)?.name || 'N/A'}</td>
-                        <td>{room.price.toLocaleString('vi-VN')}</td>
-                        <td>{room.status}</td>
-                      </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-          )}
-        </section>
-
-        {/* Khách hàng */}
-        <section className="booking-section">
-          <h2 className="section-title">Thông tin khách hàng</h2>
-          <div className="form-group">
-            <label>
-              <input type="checkbox" checked={useExistingCustomer} onChange={() => setUseExistingCustomer(!useExistingCustomer)} />
-              Sử dụng khách hàng hiện có
-            </label>
+                ))}
+              </tbody>
+            </table>
           </div>
-          {useExistingCustomer ? (
-              <div className="form-group">
-                <label>Chọn khách hàng</label>
-                <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="form-input">
-                  <option value="">Chọn khách hàng</option>
-                  {customers.map((customer) => (
-                      <option key={customer.customerId} value={customer.customerId}>
-                        {customer.fullName} ({customer.email})
-                      </option>
-                  ))}
-                </select>
-              </div>
-          ) : (
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Họ và tên</label>
-                  <input type="text" name="fullName" value={newCustomer.fullName} onChange={handleNewCustomerChange} className="form-input" required />
-                </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" name="email" value={newCustomer.email} onChange={handleNewCustomerChange} className="form-input" required />
-                </div>
-                <div className="form-group">
-                  <label>Số điện thoại</label>
-                  <input type="tel" name="phone" value={newCustomer.phone} onChange={handleNewCustomerChange} className="form-input" required />
-                </div>
-              </div>
-          )}
-          {customerError && <div className="error-message">{customerError}</div>}
-        </section>
+        )}
+      </section>
 
-        {/* Thanh toán */}
-        <section className="booking-section">
-          <h2 className="section-title">Phương thức thanh toán</h2>
-          <div className="form-group">
-            <label>Chọn phương thức</label>
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="form-input">
-              <option value="counter">Thanh toán tại quầy</option>
-              <option value="vnpay">VNPay</option>
-              <option value="visa">Visa</option>
-            </select>
+      {/* Thông tin khách hàng hiện tại */}
+      <section className="booking-section">
+        <h2 className="section-title">Thông tin khách hàng</h2>
+        {customerError && <div className="error-message">{customerError}</div>}
+        {currentCustomer ? (
+          <div className="customer-info">
+            <p><strong>Họ và tên:</strong> {currentCustomer.fullName}</p>
+            <p><strong>Email:</strong> {currentCustomer.email}</p>
+            <p><strong>Số điện thoại:</strong> {currentCustomer.phone}</p>
           </div>
-          {paymentError && <div className="error-message">{paymentError}</div>}
-        </section>
+        ) : (
+          !customerError && <p>Đang tải thông tin khách hàng...</p>
+        )}
+      </section>
 
-        {/* Gửi */}
-        <button onClick={handleSubmitBooking} className="booking-button" disabled={bookingLoading}>
-          {bookingLoading ? 'Đang xử lý...' : 'Xác nhận đặt phòng'}
-        </button>
-        {bookingError && <div className="error-message">{bookingError}</div>}
-        {bookingSuccess && <div className="success-message">{bookingSuccess}</div>}
-      </div>
+      {/* Thanh toán */}
+      <section className="booking-section">
+        <h2 className="section-title">Phương thức thanh toán</h2>
+        <div className="form-group">
+          <label>Chọn phương thức</label>
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="form-input"
+          >
+            <option value="counter">Thanh toán tại quầy</option>
+            <option value="vnpay">VNPay</option>
+            <option value="visa">Visa</option>
+          </select>
+        </div>
+        {paymentError && <div className="error-message">{paymentError}</div>}
+      </section>
+
+      {/* Gửi */}
+      <button
+        onClick={handleSubmitBooking}
+        className="booking-button"
+        disabled={bookingLoading}
+      >
+        {bookingLoading ? 'Đang xử lý...' : 'Xác nhận đặt phòng'}
+      </button>
+      {bookingError && <div className="error-message">{bookingError}</div>}
+      {bookingSuccess && <div className="success-message">{bookingSuccess}</div>}
+    </div>
   );
 };
 

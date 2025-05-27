@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 //                        hasAuthority("QUAN_LY")
+                                .requestMatchers("/api/v1/customers/me").authenticated()
                         .requestMatchers("/", "/register", "/error", "/api/v1/auth/**").permitAll()
                         .requestMatchers( "/employee", "/dashboard").permitAll()
                         .requestMatchers("/api/v1/customers/**", "/customers").permitAll()

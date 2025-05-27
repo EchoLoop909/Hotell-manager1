@@ -20,6 +20,8 @@ import CustomerManagementEmployee from "./components/Employee/CustomerManagement
 import EmployeeUpdate from "./components/Employee/EmployeeUpdate";
 import SearchRoom from "./components/Custommer/SearchRoom";
 import BookingRoom from "./components/Custommer/BookingRoom";
+import CustomerUpdate from "./components/Custommer/CustomerUpdate";
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('user_role');
   if (!userRole || (allowedRoles && !allowedRoles.includes(userRole))) {
@@ -59,6 +61,14 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                                  path="/customer/profile"
+                                  element={
+                                    <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                                      <CustomerUpdate />
+                                    </ProtectedRoute>
+                                  }
+                                />
           <Route
               path="/receptionist/cancel-booking"
               element={
