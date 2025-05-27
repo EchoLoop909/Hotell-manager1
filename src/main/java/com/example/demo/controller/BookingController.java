@@ -22,4 +22,6 @@ public class BookingController {
     public ResponseEntity<?> cancelBooking(@RequestParam Integer id) {
         return bookingService.cancelBooking(id);
     }
+
+
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@Controller
 public class CustomerController {
     private final CustomerServiceIpml customerServiceIpml;
 
@@ -53,4 +52,5 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + e.getMessage());
         }
     }
+
 }

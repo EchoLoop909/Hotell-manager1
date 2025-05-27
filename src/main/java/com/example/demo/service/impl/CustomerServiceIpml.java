@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.model.entity.Booking;
 import com.example.demo.model.entity.Customer;
 import com.example.demo.repository.CustomerRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,12 +33,26 @@ public class CustomerServiceIpml {
     }
 
     public void updateCustomer(Customer customer) {
-        Optional<Customer> existingUser = customerRepository.findById(customer.getCustomerId());
-        if (!existingUser.isPresent()) {
+        Optional<Customer> existingUserOpt = customerRepository.findById(customer.getCustomerId());
+        if (!existingUserOpt.isPresent()) {
             throw new RuntimeException("Khách hàng không tồn tại.");
         }
-        customerRepository.save(customer);
+
+        Customer existingUser = existingUserOpt.get();
+
+        // Cập nhật thông tin
+        existingUser.setName(customer.getName());
+        existingUser.setEmail(customer.getEmail());
+        existingUser.setPhone(customer.getPhone());
+
+        // Nếu có mật khẩu mới thì mã hóa và cập nhật
+        if (customer.getPassword() != null && !customer.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(customer.getPassword()));
+        }
+
+        customerRepository.save(existingUser);
     }
+
 
     public void deleteCustomer(Integer id) {
         Optional<Customer> existingUser = customerRepository.findById(id);
@@ -45,5 +60,6 @@ public class CustomerServiceIpml {
             throw new RuntimeException("Khách hàng không tồn tại.");
         }
         customerRepository.deleteById(id);
+
     }
 }

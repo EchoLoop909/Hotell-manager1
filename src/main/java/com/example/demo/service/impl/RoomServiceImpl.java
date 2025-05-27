@@ -133,7 +133,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('QUAN_LY')")
     public ResponseEntity<RoomDto> updateRoom(int id, RoomDto roomDto) {
         try {
             Room room = roomRepository.findById(id)
@@ -195,7 +194,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('QUAN_LY')")
     public ResponseEntity<Void> deleteRoom(int id) {
         try {
             Room room = roomRepository.findById(id)

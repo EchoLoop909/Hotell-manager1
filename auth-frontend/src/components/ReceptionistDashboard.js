@@ -31,8 +31,17 @@ const ReceptionistDashboard = () => {
           <Link to="/receptionist/book" className="nav-card">
             Đặt phòng
           </Link>
-          <Link to="/employees" className="nav-card">
-            Quản lý nhân viên
+          <Link to="/receptionist/cancel-booking" className="btn btn-danger">
+            Hủy đặt phòng
+          </Link>
+          <Link to="/receptionist/invoices" className="nav-card">
+            Xem hóa đơn
+          </Link>
+          <Link to="/receptionist/custommer" className="nav-card">
+            Xem thông tin khách hàng
+          </Link>
+          <Link to="/receptionist/employeeUpdate" className="nav-card">
+            Update thông itn bản thân
           </Link>
         </div>
       </main>

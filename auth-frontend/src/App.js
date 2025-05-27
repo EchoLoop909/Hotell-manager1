@@ -13,6 +13,10 @@ import RoomManagement from './components/Admin/RoomManagement';
 import InvoiceManagement from './components/Admin/InvoiceManagement';
 import ServiceManagement from './components/Admin/ServiceManagement';
 import RoomTypeManagement from './components/Admin/RoomTypeManagement';
+import InvoiceManagement1 from './components/Employee/InvoiceManagement1';
+import CancelBooking from "./components/Employee/CancelBooking";
+import CustomerManagementEmployee from "./components/Employee/CustomerManagementEmployee";
+import EmployeeUpdate from "./components/Employee/EmployeeUpdate";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('user_role');
@@ -45,6 +49,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+          <Route
+              path="/receptionist/cancel-booking"
+              element={
+                <ProtectedRoute allowedRoles={['LE_TAN']}>
+                  <CancelBooking />
+                </ProtectedRoute>
+              }
+              />
         <Route
           path="/receptionist/search-room"
           element={
@@ -96,11 +108,35 @@ const App = () => {
         <Route
           path="/invoices"
           element={
-            <ProtectedRoute allowedRoles={['QUAN_LY']}>
+            <ProtectedRoute allowedRoles={['QUAN_LY','LE_TAN']}>
               <InvoiceManagement />
             </ProtectedRoute>
           }
         />
+          <Route
+              path="/receptionist/invoices"
+              element={
+                  <ProtectedRoute allowedRoles={['LE_TAN']}>
+                      <InvoiceManagement1 />
+                  </ProtectedRoute>
+              }
+          />
+          <Route
+              path="/receptionist/custommer"
+              element={
+                  <ProtectedRoute allowedRoles={['LE_TAN']}>
+                      <CustomerManagementEmployee />
+                  </ProtectedRoute>
+              }
+          />
+          <Route
+              path="/receptionist/employeeUpdate"
+              element={
+                  <ProtectedRoute allowedRoles={['LE_TAN']}>
+                      <EmployeeUpdate />
+                  </ProtectedRoute>
+              }
+          />
         <Route
           path="/services"
           element={

@@ -161,6 +161,4 @@ public ResponseEntity<?> cancelBooking(Integer id) {
         throw e;
     }
 }
-
-
 }
