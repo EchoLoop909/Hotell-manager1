@@ -129,5 +129,4 @@ public class RoomTypeServiceIpml implements RoomTypeService {
             return new ResponseEntity<>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

@@ -11,4 +11,5 @@ public interface EmployeeService {
     ResponseEntity<?> searchEmployees(String name, String email, String role);
     ResponseEntity<?> updateEmployee(EmployeeDto dto, Integer id);
     ResponseEntity<?> deleteEmployee(Integer id);
+    ResponseEntity<EmployeeDto> getCurrentEmployee(String email);
 }

@@ -1,6 +1,5 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.entity.Booking;
 import com.example.demo.model.entity.Customer;
 import com.example.demo.repository.CustomerRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,5 +60,9 @@ public class CustomerServiceIpml {
         }
         customerRepository.deleteById(id);
 
+    }
+
+    public Optional<Customer> getCustomerByUsername(String username) {
+        return customerRepository.findByEmail(username);
     }
 }

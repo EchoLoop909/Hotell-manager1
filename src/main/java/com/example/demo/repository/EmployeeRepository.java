@@ -21,4 +21,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
                                          @Param("email") String email,
                                          @Param("role") Employee.EmployeeRole role);
 
+
 }

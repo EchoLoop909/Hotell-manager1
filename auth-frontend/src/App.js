@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './components/Login';
 import Register from './components/Register';
 import Home from './components/Home';
+import CustomerDashboard from './components/CustomerDashboard';
 import ReceptionistDashboard from './components/ReceptionistDashboard';
 import ReceptionistSearchRoom from './components/Employee/ReceptionistSearchRoom';
 import BookingForm from './components/Employee/BookingForm';
@@ -17,7 +18,8 @@ import InvoiceManagement1 from './components/Employee/InvoiceManagement1';
 import CancelBooking from "./components/Employee/CancelBooking";
 import CustomerManagementEmployee from "./components/Employee/CustomerManagementEmployee";
 import EmployeeUpdate from "./components/Employee/EmployeeUpdate";
-
+import SearchRoom from "./components/Custommer/SearchRoom";
+import BookingRoom from "./components/Custommer/BookingRoom";
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('user_role');
   if (!userRole || (allowedRoles && !allowedRoles.includes(userRole))) {
@@ -50,6 +52,14 @@ const App = () => {
           }
         />
           <Route
+                  path="/customer"
+                  element={
+                    <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                      <CustomerDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+          <Route
               path="/receptionist/cancel-booking"
               element={
                 <ProtectedRoute allowedRoles={['LE_TAN']}>
@@ -57,6 +67,22 @@ const App = () => {
                 </ProtectedRoute>
               }
               />
+              <Route
+                            path="/customer/book"
+                            element={
+                              <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                                <BookingRoom />
+                              </ProtectedRoute>
+                            }
+                            />
+              <Route
+                            path="/Customer/SearchRoom"
+                            element={
+                              <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                                <SearchRoom />
+                              </ProtectedRoute>
+                            }
+                            />
         <Route
           path="/receptionist/search-room"
           element={

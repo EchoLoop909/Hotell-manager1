@@ -1,7 +1,6 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.model.EmployeeDto;
-import com.example.demo.model.entity.Booking;
 import com.example.demo.model.entity.Employee;
 import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.EmployeeRepository;
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -151,5 +151,21 @@ public class EmployeeServiceImpl implements EmployeeService {
             logger.error("Lỗi xóa nhân viên: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không mong muốn");
         }
+    }
+
+    @Override
+    public ResponseEntity<EmployeeDto> getCurrentEmployee(String email) {
+        return employeeRepository.findByEmail(email)
+                .map(emp -> {
+                    EmployeeDto dto = new EmployeeDto(
+                            emp.getEmployeeId(),
+                            emp.getName(),
+                            emp.getEmail(),
+                            emp.getEmployeeRole().name()
+                    );
+                    return ResponseEntity.ok(dto);
+                })
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Không tìm thấy thông tin người dùng"));
     }
 }

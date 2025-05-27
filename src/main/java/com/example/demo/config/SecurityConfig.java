@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 //                        hasAuthority("QUAN_LY")
                         .requestMatchers("/", "/register", "/error", "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/employees/**", "/employee", "/dashboard").permitAll()
+                        .requestMatchers( "/employee", "/dashboard").permitAll()
                         .requestMatchers("/api/v1/customers/**", "/customers").permitAll()
                         .requestMatchers("/home", "/bookings").permitAll()
                         .requestMatchers("/api/v1/auth/authenticate").permitAll() // Chỉ cần một lần, sửa trùng lặp
@@ -43,7 +43,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/Service/**").permitAll()
                         .requestMatchers("/api/v1/invoices/**").permitAll()
                         .requestMatchers("/api/booking-services").permitAll()
-                        .requestMatchers("/api/v1/roomType/getall", "/api/v1/rooms/search").permitAll() // Đảm bảo đúng đường dẫn
+                                .requestMatchers("/api/v1/employees/me").authenticated()
+                                .requestMatchers("/api/v1/employees/**").permitAll()
+                                .requestMatchers("/api/v1/roomType/getall", "/api/v1/rooms/search").permitAll() // Đảm bảo đúng đường dẫn
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

@@ -60,7 +60,7 @@ public class RoomServiceImpl implements RoomService {
             room.setType(roomType);
             room.setPrice(roomDto.getPrice());
             room.setStatus(RoomStatus.valueOf("trống"));
-
+            room.setImageUrl(roomDto.getImageUrl());
             // Lưu Room
             Room savedRoom = roomRepository.save(room);
 

@@ -24,6 +24,8 @@ public class Room {
     @Column(nullable = false)
     private BigDecimal price;
 
+    private String imageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('trống', 'đã_đặt', 'đang_dọn') DEFAULT 'trống'")
     private RoomStatus status;

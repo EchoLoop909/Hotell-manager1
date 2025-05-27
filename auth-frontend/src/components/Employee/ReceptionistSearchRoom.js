@@ -55,7 +55,7 @@ const ReceptionistSearchRoom = () => {
         setRooms(data);
       }
     } catch (err) {
-      setError(err.message || 'Lỗi khi tìm kiếm phòng');
+      setError(err.message || 'Không tìm thấy phòng phù hợp');
     } finally {
       setLoading(false);
     }

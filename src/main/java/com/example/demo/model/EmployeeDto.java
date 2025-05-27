@@ -25,11 +25,4 @@ public class EmployeeDto {
         this.email = email;
         this.employeeRole = name1;
     }
-
-//    public EmployeeDto(Integer employeeId, String name, String email, Employee.EmployeeRole employeeRole) {
-//        this.name = name;
-//        this.email = email;
-//        this.employeeRole = employeeRole.name();  // convert Enum to String
-//    }
-
 }

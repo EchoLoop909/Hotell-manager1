@@ -198,6 +198,7 @@ const RoomManagement = () => {
           <table className="room-table">
             <thead>
             <tr>
+              <th>Hình ảnh</th>
               <th>Mã phòng</th>
               <th>Kiểu phòng</th>
               <th>Giá</th>
@@ -211,6 +212,13 @@ const RoomManagement = () => {
             ) : (
                 rooms.map(room => (
                     <tr key={room.roomId}>
+                           <td>
+                                                <img
+                                                  src={room.imageUrl || 'https://via.placeholder.com/100'}
+                                                  alt="Phòng"
+                                                  style={{ width: '100px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
+                                                />
+                                              </td>
                       <td>{room.sku}</td>
                       <td>{room.typeName}</td>
                       <td>{room.price.toLocaleString('vi-VN')} VNĐ</td>

@@ -6,6 +6,8 @@ import com.example.demo.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,5 +68,10 @@ public class EmployeeController {
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteEmployee(@RequestParam Integer id) {
         return employeeService.deleteEmployee(id);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<EmployeeDto> getCurrentUser(@AuthenticationPrincipal UserDetails user) {
+        return employeeService.getCurrentEmployee(user.getUsername());
     }
 }

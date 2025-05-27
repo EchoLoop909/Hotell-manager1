@@ -12,4 +12,5 @@ public class RoomDto {
     private int typeId;
     private BigDecimal price;
     private RoomStatus status;
+    private String imageUrl;
 }

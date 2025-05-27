@@ -700,7 +700,6 @@ const BookingForm = () => {
           {paymentError && <div className="error-message">{paymentError}</div>}
         </section>
 
-        {/* Gửi */}
         <button onClick={handleSubmitBooking} className="booking-button" disabled={bookingLoading}>
           {bookingLoading ? 'Đang xử lý...' : 'Xác nhận đặt phòng'}
         </button>
