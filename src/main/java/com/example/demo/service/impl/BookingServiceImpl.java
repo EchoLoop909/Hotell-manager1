@@ -161,4 +161,27 @@ public ResponseEntity<?> cancelBooking(Integer id) {
         throw e;
     }
 }
+
+    public ResponseEntity<BookingDto> getBookingById(Integer id) {
+        Optional<Booking> optional = bookingRepository.findById(id);
+        if (optional.isPresent()) {
+            Booking booking = optional.get();
+            BookingDto dto = new BookingDto();
+
+            dto.setBookingId(booking.getBookingId());
+            dto.setCheckIn(booking.getCheckIn());
+            dto.setCheckOut(booking.getCheckOut());
+            dto.setStatus(String.valueOf(booking.getStatus()));
+            dto.setTotalPrice(booking.getTotalPrice());
+            dto.setCustomerId(booking.getCustomer().getCustomerId());
+            dto.setEmployeeId(booking.getEmployee().getEmployeeId());
+            dto.setRoomId(booking.getRoom().getRoomId());
+            dto.setCustomerName(booking.getCustomer().getName());
+
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

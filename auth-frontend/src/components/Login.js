@@ -55,18 +55,18 @@ const Login = () => {
 
     return (
         <>
-            <nav className="navbar">
-                <div className="navbar-brand">Employee Management</div>
+            <nav>
+                <div>Employee Management</div>
             </nav>
-            <div className="component-container login-container">
+            <div className="component-container">
                 <h2>Đăng nhập</h2>
                 {message && (
                     <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
                         {message}
                     </p>
                 )}
-                {loading && <div className="loader"></div>}
-                <form onSubmit={handleLogin} className="login-form">
+                {loading && <div className="loading">Đang tải...</div>}
+                <form onSubmit={handleLogin}>
                     <input
                         type="email"
                         placeholder="Email"
@@ -86,7 +86,7 @@ const Login = () => {
                     </button>
                 </form>
                 <p>
-                    Chưa có tài khoản? <Link to="/register" className="register-link">Đăng ký</Link>
+                    Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
                 </p>
             </div>
         </>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { NavLink, useNavigate } from 'react-router-dom';
-import '../../styles/InvoiceManagement.css';
+import { useNavigate } from 'react-router-dom';
 
 const InvoiceManagement1 = () => {
     const [invoices, setInvoices] = useState([]);
@@ -17,7 +16,6 @@ const InvoiceManagement1 = () => {
     const [message, setMessage] = useState('');
 
     const navigate = useNavigate();
-    const userName = localStorage.getItem('user_name');
     const userRole = localStorage.getItem('user_role');
     const isQuanLy = userRole === 'LE_TAN';
 
@@ -142,45 +140,26 @@ const InvoiceManagement1 = () => {
         }
     };
 
-    const handleLogout = async () => {
-        setLoading(true);
-        try {
-            const authAPI = axios.create({
-                baseURL: 'http://localhost:8888/api/v1/auth',
-                headers: { 'Content-Type': 'application/json' },
-            });
-            const refreshToken = localStorage.getItem('refresh_token');
-            await authAPI.post('/logout', { refreshToken });
-        } catch {
-            // ignore
-        } finally {
-            localStorage.clear();
-            navigate('/');
-        }
-    };
-
     if (!isQuanLy) {
-        return <p className="message error">{message}</p>;
+        return <p>{message}</p>;
     }
 
     return (
         <>
-            <section className="container">
-                <header className="header">
+            <section>
+                <header>
                     <h1>Quản lý Hóa Đơn</h1>
                 </header>
 
                 {message && (
-                    <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
-                        {message}
-                    </p>
+                    <p>{message}</p>
                 )}
-                {loading && <div className="loader"></div>}
+                {loading && <div>Loading...</div>}
 
-                <section className="form-section">
-                    <form onSubmit={handleSubmit} className="form">
-                        <div className="form-group">
-                            <label htmlFor="bookingId">Booking ID <span className="required">*</span></label>
+                <section>
+                    <form onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="bookingId">Booking ID <span>*</span></label>
                             <input
                                 id="bookingId"
                                 name="bookingId"
@@ -192,8 +171,8 @@ const InvoiceManagement1 = () => {
                                 min={1}
                             />
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="serviceId">Service ID <span className="required">*</span></label>
+                        <div>
+                            <label htmlFor="serviceId">Service ID <span>*</span></label>
                             <input
                                 id="serviceId"
                                 name="serviceId"
@@ -205,7 +184,7 @@ const InvoiceManagement1 = () => {
                                 min={1}
                             />
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label htmlFor="paymentMethod">Phương thức thanh toán</label>
                             <select
                                 id="paymentMethod"
@@ -218,7 +197,7 @@ const InvoiceManagement1 = () => {
                                 <option value="tại_quầy">Tại quầy</option>
                             </select>
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label htmlFor="status">Trạng thái</label>
                             <select
                                 id="status"
@@ -231,7 +210,7 @@ const InvoiceManagement1 = () => {
                                 <option value="đã_hủy">Đã hủy</option>
                             </select>
                         </div>
-                        <div className="form-group">
+                        <div>
                             <label htmlFor="paymentDate">Ngày thanh toán</label>
                             <input
                                 id="paymentDate"
@@ -242,11 +221,11 @@ const InvoiceManagement1 = () => {
                             />
                         </div>
 
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                        <button type="submit" disabled={loading}>
                             {editingId == null ? 'Tạo mới' : 'Cập nhật'}
                         </button>
                         {editingId != null && (
-                            <button type="button" className="btn btn-secondary" onClick={() => {
+                            <button type="button" onClick={() => {
                                 setEditingId(null);
                                 setForm({ bookingId: '', serviceId: '', paymentMethod: 'VNPay', status: 'chưa_thanh_toán', paymentDate: '' });
                                 setMessage('');
@@ -257,8 +236,8 @@ const InvoiceManagement1 = () => {
                     </form>
                 </section>
 
-                <section className="table-section">
-                    <table className="table">
+                <section>
+                    <table>
                         <thead>
                         <tr>
                             <th>Booking ID</th>
@@ -288,14 +267,12 @@ const InvoiceManagement1 = () => {
                                         : ''}</td>
                                     <td>
                                         <button
-                                            className="btn btn-sm btn-warning"
                                             onClick={() => handleEdit(inv)}
                                             disabled={loading}
                                         >
                                             Sửa
                                         </button>{' '}
                                         <button
-                                            className="btn btn-sm btn-info"
                                             onClick={() => handleExportPdf(inv.invoiceId)}
                                             disabled={loading}
                                         >

@@ -27,4 +27,5 @@ public class RoomType {
 
     @Column(name = "default_price", nullable = false)
     private BigDecimal defaultPrice;
+
 }

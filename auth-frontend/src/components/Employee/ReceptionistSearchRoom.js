@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { searchRooms, getRoomTypes } from '../../api';
 
-import '../../styles/styles.css'
-
 const ReceptionistSearchRoom = () => {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -62,79 +60,72 @@ const ReceptionistSearchRoom = () => {
   };
 
   return (
-    <div className="search-container">
-      <h1 className="search-title">Tìm kiếm phòng trống</h1>
+      <div>
+        <h1>Tìm kiếm phòng trống</h1>
 
-      <form onSubmit={handleSearch} className="search-form">
-        <div className="form-grid">
-          <div className="form-group">
+        <form onSubmit={handleSearch}>
+          <div>
             <label>Ngày check-in</label>
             <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="form-input"
-              required
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                required
             />
           </div>
-          <div className="form-group">
+          <div>
             <label>Ngày check-out</label>
             <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="form-input"
-              required
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                required
             />
           </div>
-          <div className="form-group">
+          <div>
             <label>Loại phòng</label>
             <select
-              value={roomTypeId}
-              onChange={(e) => setRoomTypeId(e.target.value)}
-              className="form-input"
+                value={roomTypeId}
+                onChange={(e) => setRoomTypeId(e.target.value)}
             >
               <option value="">Tất cả</option>
               {roomTypes.map((type) => (
-                <option key={type.typeId} value={type.typeId}>
-                  {type.name} (Sức chứa: {type.capacity})
-                </option>
+                  <option key={type.typeId} value={type.typeId}>
+                    {type.name} (Sức chứa: {type.capacity})
+                  </option>
               ))}
             </select>
           </div>
-        </div>
-        <button type="submit" className="search-button" disabled={loading}>
-          {loading ? 'Đang tìm kiếm...' : 'Tìm kiếm'}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Đang tìm kiếm...' : 'Tìm kiếm'}
+          </button>
+        </form>
 
-      {error && <div className="error-message">{error}</div>}
+        {error && <div>{error}</div>}
 
-      {rooms.length > 0 && (
-        <div className="results-table">
-          <table>
-            <thead>
+        {rooms.length > 0 && (
+            <table>
+              <thead>
               <tr>
                 <th>Mã phòng</th>
                 <th>Loại phòng</th>
                 <th>Giá</th>
                 <th>Trạng thái</th>
               </tr>
-            </thead>
-            <tbody>
+              </thead>
+              <tbody>
               {rooms.map((room) => (
-                <tr key={room.roomId}>
-                  <td>{room.sku}</td>
-                  <td>{roomTypes.find((type) => type.typeId === room.typeId)?.name || 'N/A'}</td>
-                  <td>{room.price.toLocaleString('vi-VN')} VNĐ</td>
-                  <td>{room.status}</td>
-                </tr>
+                  <tr key={room.roomId}>
+                    <td>{room.sku}</td>
+                    <td>{roomTypes.find((type) => type.typeId === room.typeId)?.name || 'N/A'}</td>
+                    <td>{room.price.toLocaleString('vi-VN')} VNĐ</td>
+                    <td>{room.status}</td>
+                  </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+              </tbody>
+            </table>
+        )}
+      </div>
   );
 };
 

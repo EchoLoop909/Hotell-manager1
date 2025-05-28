@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.model.BookingDto;
 import com.example.demo.model.InvoiceDto;
 import com.example.demo.model.entity.*;
 import com.example.demo.repository.BookingRepository;
@@ -18,6 +19,7 @@ import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.lowagie.text.*;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import com.itextpdf.layout.Document;
 
@@ -26,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -34,6 +37,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final BookingRepository bookingRepo;
     private final InvoiceRepository invoiceRepo;
     private final ServiceRepository serviceRepo;
+    private BookingServiceImpl bookingService;
 
     public InvoiceServiceImpl(BookingRepository bookingRepo,
                               InvoiceRepository invoiceRepo,
@@ -309,5 +313,75 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Đóng document
         document.close();
     }
+
+    @Override
+    public List<InvoiceDto> getInvoicesByCustomer(Integer customerId) {
+        List<Invoice> invoices = invoiceRepo.findByBookingCustomerCustomerId(customerId);
+
+        return invoices.stream()
+                .map(inv -> {
+                    InvoiceDto dto = new InvoiceDto();
+                    dto.setInvoiceId(inv.getInvoiceId());
+                    dto.setPaymentMethod(inv.getPaymentMethod() != null ? inv.getPaymentMethod().name() : null);
+                    dto.setStatus(inv.getStatus() != null ? inv.getStatus().name() : null);
+                    dto.setPaymentDate(inv.getPaymentDate());
+
+                    // Lấy thông tin phòng - lấy sku làm mã phòng
+                    if (inv.getBooking() != null && inv.getBooking().getRoom() != null) {
+                        Room room = inv.getBooking().getRoom();
+                        dto.setRoomSku(room.getSku());  // Lấy mã phòng ở đây
+                        // Nếu không có tên phòng thì không set hoặc có thể bỏ dòng này
+                        // dto.setRoomName(room.getName());
+                        if (room.getType() != null) {
+                            dto.setRoomTypeName(room.getType().getName());
+                        }
+                    }
+
+                    // Lấy tên dịch vụ
+                    if (inv.getService() != null) {
+                        dto.setServiceName(inv.getService().getName());
+                    }
+
+                    // Lấy tên khách hàng nếu cần
+                    if (inv.getBooking() != null && inv.getBooking().getCustomer() != null) {
+                        dto.setCustomerName(inv.getBooking().getCustomer().getName());
+                    }
+
+                    dto.setTotalAmount(inv.getTotalAmount());
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private InvoiceDto convertToDto(Invoice inv) {
+        InvoiceDto dto = new InvoiceDto();
+        dto.setInvoiceId(inv.getInvoiceId());
+        dto.setBookingId(inv.getBooking() != null ? inv.getBooking().getBookingId() : null);
+        dto.setServiceId(inv.getService() != null ? inv.getService().getServiceId() : null);
+        dto.setTotalAmount(inv.getTotalAmount());
+        dto.setPaymentMethod(inv.getPaymentMethod() != null ? inv.getPaymentMethod().name() : null);
+        dto.setStatus(inv.getStatus() != null ? inv.getStatus().name() : null);
+        dto.setPaymentDate(inv.getPaymentDate());
+
+        // Lấy thông tin phòng từ booking
+        if (inv.getBooking() != null && inv.getBooking().getRoom() != null) {
+            Room room = inv.getBooking().getRoom();
+            dto.setRoomSku(room.getSku());
+            dto.setRoomName(room.getName());
+            if (room.getType() != null) {
+                dto.setRoomTypeName(room.getType().getName());
+            }
+        }
+
+        // Lấy tên dịch vụ
+        if (inv.getService() != null) {
+            dto.setServiceName(inv.getService().getName());
+        }
+
+        return dto;
+    }
+
+
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../styles/ServiceManagement.css';
+import '../../styles/admin.css';
 
 const ServiceManagement = () => {
   const [services, setServices] = useState([]);
@@ -126,123 +126,75 @@ const ServiceManagement = () => {
   };
 
   if (!isQuanLy) {
-    return <p className="message error">{message}</p>;
+    return <p>{message}</p>;
   }
 
   return (
-    <>
-      <nav className="navbar">
-        <div className="navbar-brand">Hotel Management</div>
-        <ul className="navbar-menu">
-          <li>
-            <NavLink to="/employees" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý nhân viên
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/customers" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý khách hàng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/rooms" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý phòng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/room-types" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý kiểu phòng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/invoices" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý hóa đơn
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/services" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              Quản lý dịch vụ
-            </NavLink>
-          </li>
-        </ul>
-        <div className="navbar-user">
-          <span>
-            Xin chào, <strong>{userName}</strong> ({userRole})
-          </span>
-          <button className="logout-btn" onClick={handleLogout} disabled={loading}>
-            Đăng xuất
-          </button>
-        </div>
-      </nav>
+      <>
 
-      <div className="container">
-        <h2>Quản lý Dịch vụ</h2>
-        {message && <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</p>}
-        {loading && <div className="loader"></div>}
+        <nav>
+          <div>Hotel Management</div>
+          <ul>
+            <li><NavLink to="/employees">Quản lý nhân viên</NavLink></li>
+            <li><NavLink to="/customers">Quản lý khách hàng</NavLink></li>
+            <li><NavLink to="/rooms">Quản lý phòng</NavLink></li>
+            <li><NavLink to="/room-types">Quản lý kiểu phòng</NavLink></li>
+            <li><NavLink to="/invoices">Quản lý hóa đơn</NavLink></li>
+            <li><NavLink to="/services">Quản lý dịch vụ</NavLink></li>
+          </ul>
+          <div>
+            <span>Xin chào, {userName} ({userRole})</span>
+            <button onClick={handleLogout} disabled={loading}>Đăng xuất</button>
+          </div>
+        </nav>
 
-        <form onSubmit={handleSubmit} className="form">
-          <div className="form-group">
-            <label>
-              Tên dịch vụ <span className="required">*</span>
-            </label>
-            <input
-              name="name"
-              placeholder="Tên dịch vụ *"
-              value={form.name}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
-          </div>
-          <div className="form-group">
-            <label>Mô tả</label>
-            <textarea
-              name="description"
-              placeholder="Mô tả"
-              value={form.description}
-              onChange={handleChange}
-              disabled={loading}
-              rows={3}
-            />
-          </div>
-          <div className="form-group">
-            <label>
-              Giá <span className="required">*</span>
-            </label>
-            <input
-              name="price"
-              type="number"
-              placeholder="Giá *"
-              value={form.price}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {editingId == null ? 'Tạo mới' : 'Cập nhật'}
-            </button>
-            {editingId != null && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setEditingId(null);
-                  setForm({ id: null, name: '', description: '', price: '' });
-                  setMessage('');
-                }}
-                disabled={loading}
-              >
-                Hủy
+        <div className="component-container">
+          <h2>Quản lý Dịch vụ</h2>
+          {message && <p>{message}</p>}
+          {loading && <p>Đang tải...</p>}
+
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label>
+                Tên dịch vụ *
+                <input name="name" value={form.name} onChange={handleChange} disabled={loading} required />
+              </label>
+            </div>
+            <div>
+              <label>
+                Mô tả
+                <textarea name="description" value={form.description} onChange={handleChange} disabled={loading} />
+              </label>
+            </div>
+            <div>
+              <label>
+                Giá *
+                <input name="price" type="number" value={form.price} onChange={handleChange} disabled={loading} required />
+              </label>
+            </div>
+            <div>
+              <button type="submit" disabled={loading}>
+                {editingId == null ? 'Tạo mới' : 'Cập nhật'}
               </button>
-            )}
-          </div>
-        </form>
+              {editingId != null && (
+                  <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm({ id: null, name: '', description: '', price: '' });
+                        setMessage('');
+                      }}
+                      disabled={loading}
+                  >
+                    Hủy
+                  </button>
+              )}
+            </div>
+          </form>
 
-        <h3>Danh sách dịch vụ</h3>
-        <table className="table table-striped table-hover">
-          <thead>
+          <h3>Danh sách dịch vụ</h3>
+          <table>
+            <thead>
             <tr>
               <th>ID</th>
               <th>Tên</th>
@@ -250,36 +202,138 @@ const ServiceManagement = () => {
               <th>Giá</th>
               <th>Hành động</th>
             </tr>
-          </thead>
-          <tbody>
+            </thead>
+            <tbody>
             {services.length ? (
-              services.map((s) => (
-                <tr key={s.serviceId}>
-                  <td>{s.serviceId}</td>
-                  <td>{s.name}</td>
-                  <td>{s.description || 'Không có'}</td>
-                  <td>{Number(s.price).toLocaleString()}</td>
-                  <td>
-                    <button className="btn-edit" onClick={() => handleEdit(s)} disabled={loading}>
-                      Sửa
-                    </button>
-                    <button className="btn-delete" onClick={() => handleDelete(s.serviceId)} disabled={loading}>
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
-              ))
+                services.map((s) => (
+                    <tr key={s.serviceId}>
+                      <td>{s.serviceId}</td>
+                      <td>{s.name}</td>
+                      <td>{s.description || 'Không có'}</td>
+                      <td>{Number(s.price).toLocaleString()}</td>
+                      <td>
+                        <button onClick={() => handleEdit(s)} disabled={loading}>Sửa</button>
+                        <button onClick={() => handleDelete(s.serviceId)} disabled={loading}>Xóa</button>
+                      </td>
+                    </tr>
+                ))
             ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: 'center' }}>
-                  Không có dữ liệu
-                </td>
-              </tr>
+                <tr>
+                  <td colSpan="5">Không có dữ liệu</td>
+                </tr>
             )}
-          </tbody>
-        </table>
-      </div>
-    </>
+            </tbody>
+          </table>
+        </div>
+
+        <style>{`
+        nav {
+          background-color: #333;
+          color: #fff;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        nav ul {
+          list-style: none;
+          display: flex;
+          gap: 10px;
+          padding: 0;
+          margin: 0;
+        }
+
+        nav ul li a {
+          color: white;
+          text-decoration: none;
+        }
+
+        nav ul li a.active {
+          font-weight: bold;
+          border-bottom: 2px solid #fff;
+        }
+
+        .component-container {
+          padding: 20px;
+          max-width: 900px;
+          margin: auto;
+        }
+
+        h2, h3 {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          color: #333;
+        }
+
+        form {
+          margin-bottom: 20px;
+          display: grid;
+          gap: 10px;
+        }
+
+        form div {
+          display: flex;
+          flex-direction: column;
+        }
+
+        input {
+          padding: 8px;
+          font-size: 16px;
+        }
+
+        button {
+          margin-right: 10px;
+          padding: 8px 12px;
+          font-size: 14px;
+          cursor: pointer;
+        }
+
+        .loading {
+          color: #555;
+          font-style: italic;
+        }
+
+        .message {
+          margin: 10px 0;
+          padding: 10px;
+          border-radius: 5px;
+        }
+
+        .message.success {
+          background-color: #d4edda;
+          color: #155724;
+        }
+
+        .message.error {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+
+        table, th, td {
+          border: 1px solid #ccc;
+        }
+
+        th, td {
+          padding: 8px;
+          text-align: left;
+        }
+
+        th {
+          background-color: #f0f0f0;
+        }
+
+        td button {
+          margin-right: 5px;
+        }
+      `}</style>
+      </>
   );
 };
 

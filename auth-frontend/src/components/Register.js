@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/styles.css';
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -44,6 +43,10 @@ const Register = () => {
     };
 
     return (
+        <>
+        <nav>
+            <div>Employee Management</div>
+        </nav>
         <div className="component-container login-container">
             <h2>Đăng ký</h2>
             <form onSubmit={handleRegister} className="login-form">
@@ -92,6 +95,7 @@ const Register = () => {
                 Đã có tài khoản? <Link to="/">Đăng nhập</Link>
             </p>
         </div>
+        </>
     );
 };
 

@@ -32,21 +32,21 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 //                        hasAuthority("QUAN_LY")
-                                .requestMatchers("/api/v1/customers/me").authenticated()
+                        .requestMatchers("/api/v1/customers/me").authenticated()
                         .requestMatchers("/", "/register", "/error", "/api/v1/auth/**").permitAll()
                         .requestMatchers( "/employee", "/dashboard").permitAll()
                         .requestMatchers("/api/v1/customers/**", "/customers").permitAll()
                         .requestMatchers("/home", "/bookings").permitAll()
-                        .requestMatchers("/api/v1/auth/authenticate").permitAll() // Chỉ cần một lần, sửa trùng lặp
+                        .requestMatchers("/api/v1/auth/authenticate").permitAll()
                         .requestMatchers("/api/v1/rooms/**").permitAll()
-                        .requestMatchers("/api/v1/roomType/**").permitAll() // Đảm bảo khớp với endpoint
+                        .requestMatchers("/api/v1/roomType/**").permitAll()
                         .requestMatchers("/api/bookings/**").permitAll()
                         .requestMatchers("/api/Service/**").permitAll()
                         .requestMatchers("/api/v1/invoices/**").permitAll()
                         .requestMatchers("/api/booking-services").permitAll()
-                                .requestMatchers("/api/v1/employees/me").authenticated()
-                                .requestMatchers("/api/v1/employees/**").permitAll()
-                                .requestMatchers("/api/v1/roomType/getall", "/api/v1/rooms/search").permitAll() // Đảm bảo đúng đường dẫn
+                        .requestMatchers("/api/v1/employees/me").authenticated()
+                        .requestMatchers("/api/v1/employees/**").permitAll()
+                        .requestMatchers("/api/v1/roomType/getall", "/api/v1/rooms/search").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

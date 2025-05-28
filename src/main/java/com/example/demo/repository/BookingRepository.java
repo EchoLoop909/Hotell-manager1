@@ -18,5 +18,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     List<Booking> findByEmployee(Optional<Employee> employee);
 
+    List<Booking> findByCustomerCustomerId(Integer customerId);
 
 }

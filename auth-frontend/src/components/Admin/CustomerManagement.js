@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../styles/CustomerManagement.css';
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState([]);
@@ -124,175 +123,242 @@ const CustomerManagement = () => {
   }
 
   return (
-    <>
-      <nav className="navbar">
-        <div className="navbar-brand">Hotel Management</div>
-        <ul className="navbar-menu">
-          <li>
-            <NavLink to="/employees" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý nhân viên
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/customers" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý khách hàng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/rooms" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý phòng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/room-types" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý kiểu phòng
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/invoices" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý hóa đơn
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/services" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Quản lý dịch vụ
-            </NavLink>
-          </li>
-        </ul>
-        <div className="navbar-user">
-          <span>Xin chào, {userName} ({userRole})</span>
-          <button className="logout-btn" onClick={handleLogout} disabled={loading}>Đăng xuất</button>
-        </div>
-      </nav>
+      <>
+        <nav>
+          <div>Hotel Management</div>
+          <ul>
+            <li><NavLink to="/employees">Quản lý nhân viên</NavLink></li>
+            <li><NavLink to="/customers">Quản lý khách hàng</NavLink></li>
+            <li><NavLink to="/rooms">Quản lý phòng</NavLink></li>
+            <li><NavLink to="/room-types">Quản lý kiểu phòng</NavLink></li>
+            <li><NavLink to="/invoices">Quản lý hóa đơn</NavLink></li>
+            <li><NavLink to="/services">Quản lý dịch vụ</NavLink></li>
+          </ul>
+          <div>
+            <span>Xin chào, {userName} ({userRole})</span>
+            <button onClick={handleLogout} disabled={loading}>Đăng xuất</button>
+          </div>
+        </nav>
 
-      <div className="container">
-        <h2>Quản lý khách hàng</h2>
-        {message && (
-          <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
-            {message}
-          </p>
-        )}
-        {loading && <div className="loader"></div>}
+        <div className="component-container">
+          <h2>Quản lý khách hàng</h2>
+          {message && <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</p>}
+          {loading && <div className="loading">Đang tải...</div>}
 
-        <form onSubmit={handleSubmit} className="form" autoComplete="off">
-          <div className="form-group">
-            <label htmlFor="name">Họ tên <span className="required">*</span></label>
-            <input
-              id="name"
-              name="name"
-              placeholder="Họ tên"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="email">Email <span className="required">*</span></label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="phone">Số điện thoại <span className="required">*</span></label>
-            <input
-              id="phone"
-              name="phone"
-              placeholder="Số điện thoại"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">
-              Mật khẩu {editingId ? '(Để trống nếu không đổi)' : <span className="required">*</span>}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Mật khẩu"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required={!editingId}
-              autoComplete={editingId ? "new-password" : "current-password"}
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {editingId ? 'Cập nhật' : 'Tạo mới'}
-            </button>
-            {editingId && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setEditingId(null);
-                  setForm({ name: '', email: '', phone: '', password: '' });
-                  setMessage('');
-                }}
-                disabled={loading}
-              >
-                Hủy
+          <form onSubmit={handleSubmit} autoComplete="off">
+            <div>
+              <label htmlFor="name">Họ tên *</label>
+              <input
+                  id="name"
+                  name="name"
+                  placeholder="Họ tên"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+              />
+            </div>
+            <div>
+              <label htmlFor="email">Email *</label>
+              <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+              />
+            </div>
+            <div>
+              <label htmlFor="phone">Số điện thoại *</label>
+              <input
+                  id="phone"
+                  name="phone"
+                  placeholder="Số điện thoại"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  required
+              />
+            </div>
+            <div>
+              <label htmlFor="password">
+                Mật khẩu {editingId ? '(Để trống nếu không đổi)' : '*'}
+              </label>
+              <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Mật khẩu"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required={!editingId}
+                  autoComplete={editingId ? "new-password" : "current-password"}
+              />
+            </div>
+            <div>
+              <button type="submit" disabled={loading}>
+                {editingId ? 'Cập nhật' : 'Tạo mới'}
               </button>
-            )}
-          </div>
-        </form>
+              {editingId && (
+                  <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm({ name: '', email: '', phone: '', password: '' });
+                        setMessage('');
+                      }}
+                      disabled={loading}
+                  >
+                    Hủy
+                  </button>
+              )}
+            </div>
+          </form>
 
-        <h3>Danh sách khách hàng</h3>
-        <table className="table table-striped table-hover">
-          <thead>
+          <h3>Danh sách khách hàng</h3>
+          <table>
+            <thead>
             <tr>
               <th>Họ tên</th>
               <th>Email</th>
               <th>Số điện thoại</th>
               <th>Hành động</th>
             </tr>
-          </thead>
-          <tbody>
+            </thead>
+            <tbody>
             {customers.length > 0 ? (
-              customers.map((c) => (
-                <tr key={c.customerId}>
-                  <td>{c.name}</td>
-                  <td>{c.email}</td>
-                  <td>{c.phone}</td>
-                  <td>
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEdit(c)}
-                      disabled={loading}
-                      type="button"
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={() => handleDelete(c.customerId)}
-                      disabled={loading}
-                      type="button"
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
-              ))
+                customers.map((c) => (
+                    <tr key={c.customerId}>
+                      <td>{c.name}</td>
+                      <td>{c.email}</td>
+                      <td>{c.phone}</td>
+                      <td>
+                        <button onClick={() => handleEdit(c)} disabled={loading} type="button">
+                          Sửa
+                        </button>
+                        <button onClick={() => handleDelete(c.customerId)} disabled={loading} type="button">
+                          Xóa
+                        </button>
+                      </td>
+                    </tr>
+                ))
             ) : (
-              <tr>
-                <td colSpan={4} style={{ textAlign: 'center' }}>
-                  Không có khách hàng nào
-                </td>
-              </tr>
+                <tr>
+                  <td colSpan="4">Không có khách hàng nào</td>
+                </tr>
             )}
-          </tbody>
-        </table>
-      </div>
-    </>
+            </tbody>
+          </table>
+        </div>
+
+        <style>{`
+        nav {
+          background-color: #333;
+          color: #fff;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        nav ul {
+          list-style: none;
+          display: flex;
+          gap: 10px;
+          padding: 0;
+          margin: 0;
+        }
+
+        nav ul li a {
+          color: white;
+          text-decoration: none;
+        }
+
+        nav ul li a.active {
+          font-weight: bold;
+          border-bottom: 2px solid #fff;
+        }
+
+        .component-container {
+          padding: 20px;
+          max-width: 900px;
+          margin: auto;
+        }
+
+        h2, h3 {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          color: #333;
+        }
+
+        form {
+          margin-bottom: 20px;
+          display: grid;
+          gap: 10px;
+        }
+
+        form div {
+          display: flex;
+          flex-direction: column;
+        }
+
+        input {
+          padding: 8px;
+          font-size: 16px;
+        }
+
+        button {
+          margin-right: 10px;
+          padding: 8px 12px;
+          font-size: 14px;
+          cursor: pointer;
+        }
+
+        .loading {
+          color: #555;
+          font-style: italic;
+        }
+
+        .message {
+          margin: 10px 0;
+          padding: 10px;
+          border-radius: 5px;
+        }
+
+        .message.success {
+          background-color: #d4edda;
+          color: #155724;
+        }
+
+        .message.error {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+
+        table, th, td {
+          border: 1px solid #ccc;
+        }
+
+        th, td {
+          padding: 8px;
+          text-align: left;
+        }
+
+        th {
+          background-color: #f0f0f0;
+        }
+
+        td button {
+          margin-right: 5px;
+        }
+      `}</style>
+      </>
   );
 };
 

@@ -15,4 +15,7 @@ public interface InvoiceService {
     List<InvoiceDto> getAllInvoices();
 
     void exportInvoicePdfById(HttpServletResponse response, Integer invoiceId) throws IOException;
+
+    List<InvoiceDto> getInvoicesByCustomer(Integer customerId);
+
 }

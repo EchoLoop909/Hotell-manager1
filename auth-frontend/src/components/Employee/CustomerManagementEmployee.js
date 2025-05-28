@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../styles/CustomerManagement.css';
 
 const CustomerManagementEmployee = () => {
     const [customers, setCustomers] = useState([]);
@@ -11,7 +10,6 @@ const CustomerManagementEmployee = () => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const userName = localStorage.getItem('user_name');
     const userRole = localStorage.getItem('user_role');
     const isQuanLy = userRole === 'LE_TAN';
     const token = localStorage.getItem('access_token');
@@ -120,23 +118,23 @@ const CustomerManagementEmployee = () => {
     };
 
     if (!isQuanLy) {
-        return <p className="message error">{message}</p>;
+        return <p>{message}</p>;
     }
 
     return (
         <>
-            <div className="container">
+            <div>
                 <h2>Quản lý khách hàng</h2>
                 {message && (
-                    <p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>
+                    <p>
                         {message}
                     </p>
                 )}
-                {loading && <div className="loader"></div>}
+                {loading && <div>Loading...</div>}
 
-                <form onSubmit={handleSubmit} className="form" autoComplete="off">
-                    <div className="form-group">
-                        <label htmlFor="name">Họ tên <span className="required">*</span></label>
+                <form onSubmit={handleSubmit} autoComplete="off">
+                    <div>
+                        <label htmlFor="name">Họ tên <span>*</span></label>
                         <input
                             id="name"
                             name="name"
@@ -146,8 +144,8 @@ const CustomerManagementEmployee = () => {
                             required
                         />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="email">Email <span className="required">*</span></label>
+                    <div>
+                        <label htmlFor="email">Email <span>*</span></label>
                         <input
                             id="email"
                             name="email"
@@ -158,8 +156,8 @@ const CustomerManagementEmployee = () => {
                             required
                         />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="phone">Số điện thoại <span className="required">*</span></label>
+                    <div>
+                        <label htmlFor="phone">Số điện thoại <span>*</span></label>
                         <input
                             id="phone"
                             name="phone"
@@ -169,9 +167,9 @@ const CustomerManagementEmployee = () => {
                             required
                         />
                     </div>
-                    <div className="form-group">
+                    <div>
                         <label htmlFor="password">
-                            Mật khẩu {editingId ? '(Để trống nếu không đổi)' : <span className="required">*</span>}
+                            Mật khẩu {editingId ? '(Để trống nếu không đổi)' : <span>*</span>}
                         </label>
                         <input
                             id="password"
@@ -184,14 +182,13 @@ const CustomerManagementEmployee = () => {
                             autoComplete={editingId ? "new-password" : "current-password"}
                         />
                     </div>
-                    <div className="form-actions">
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                    <div>
+                        <button type="submit" disabled={loading}>
                             {editingId ? 'Cập nhật' : 'Tạo mới'}
                         </button>
                         {editingId && (
                             <button
                                 type="button"
-                                className="btn btn-secondary"
                                 onClick={() => {
                                     setEditingId(null);
                                     setForm({ name: '', email: '', phone: '', password: '' });
@@ -206,7 +203,7 @@ const CustomerManagementEmployee = () => {
                 </form>
 
                 <h3>Danh sách khách hàng</h3>
-                <table className="table table-striped table-hover">
+                <table>
                     <thead>
                     <tr>
                         <th>Họ tên</th>
@@ -224,7 +221,6 @@ const CustomerManagementEmployee = () => {
                                 <td>{c.phone}</td>
                                 <td>
                                     <button
-                                        className="btn-edit"
                                         onClick={() => handleEdit(c)}
                                         disabled={loading}
                                         type="button"

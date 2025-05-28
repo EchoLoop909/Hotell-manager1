@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -23,5 +25,13 @@ public class BookingController {
         return bookingService.cancelBooking(id);
     }
 
-
+    @GetMapping("/{id}")
+    public ResponseEntity<BookingDto> getBookingById(@PathVariable Integer id) {
+        ResponseEntity<BookingDto> response = bookingService.getBookingById(id);
+        if (response.getBody() != null) {
+            return response;
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

@@ -39,30 +39,27 @@ const CancelBooking = () => {
     };
 
     return (
-        <div style={{ maxWidth: 400, margin: '2rem auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
+        <div>
             <h2>Hủy đặt phòng</h2>
             <form onSubmit={handleCancel}>
-                <div style={{ marginBottom: 12 }}>
-                    <label htmlFor="bookingId" style={{ display: 'block', marginBottom: 6 }}>
-                        Nhập ID booking cần hủy
-                    </label>
+                <div>
+                    <label htmlFor="bookingId">Nhập ID booking cần hủy</label>
                     <input
                         type="number"
                         id="bookingId"
                         value={bookingId}
                         onChange={(e) => setBookingId(e.target.value)}
-                        style={{ width: '100%', padding: 8, fontSize: 16 }}
                         placeholder="ID booking"
                     />
                 </div>
 
-                <button type="submit" disabled={loading} style={{ padding: '8px 16px', fontSize: 16 }}>
+                <button type="submit" disabled={loading}>
                     {loading ? 'Đang hủy...' : 'Hủy đặt phòng'}
                 </button>
             </form>
 
-            {message && <p style={{ marginTop: 20, color: 'green' }}>{message}</p>}
-            {error && <p style={{ marginTop: 20, color: 'red' }}>{error}</p>}
+            {message && <p>{message}</p>}
+            {error && <p>{error}</p>}
         </div>
     );
 };

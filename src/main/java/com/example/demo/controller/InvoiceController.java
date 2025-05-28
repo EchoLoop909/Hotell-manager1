@@ -56,4 +56,10 @@ public class InvoiceController {
     public void exportInvoicePdf(@PathVariable Integer id, HttpServletResponse response) throws IOException {
         invoiceService.exportInvoicePdfById(response, id);
     }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<InvoiceDto>> getInvoicesByCustomer(@PathVariable Integer customerId) {
+        List<InvoiceDto> list = invoiceService.getInvoicesByCustomer(customerId);
+        return ResponseEntity.ok(list);
+    }
 }

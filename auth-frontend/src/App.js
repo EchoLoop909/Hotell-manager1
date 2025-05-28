@@ -21,6 +21,9 @@ import EmployeeUpdate from "./components/Employee/EmployeeUpdate";
 import SearchRoom from "./components/Custommer/SearchRoom";
 import BookingRoom from "./components/Custommer/BookingRoom";
 import CustomerUpdate from "./components/Custommer/CustomerUpdate";
+import Invoice from "./components/Custommer/Invoice";
+import BookingCancel from "./components/Custommer/BookingCancel";
+
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('user_role');
@@ -69,6 +72,22 @@ const App = () => {
                                     </ProtectedRoute>
                                   }
                                 />
+          <Route
+              path="/customer/invoices"
+              element={
+                  <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                      <Invoice />
+                  </ProtectedRoute>
+              }
+          />
+          <Route
+          path="/customer/cancelbooking"
+          element={
+              <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                  <BookingCancel />
+              </ProtectedRoute>
+          }
+      />
           <Route
               path="/receptionist/cancel-booking"
               element={

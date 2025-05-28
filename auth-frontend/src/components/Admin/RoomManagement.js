@@ -1,8 +1,6 @@
-// // // src/components/RoomManagement.jsx
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../../styles/RoomManagement.css';
 
 const RoomManagement = () => {
   const [rooms, setRooms] = useState([]);
@@ -142,40 +140,122 @@ const RoomManagement = () => {
   };
 
   if (!isQuanLy) {
-    return <p className="message error">{message}</p>;
+    return <p>{message}</p>;
   }
 
   return (
       <>
-        <nav className="navbar">
-          <div className="navbar-brand">Hotel Management</div>
-          <ul className="navbar-menu">
-            <li><NavLink to="/employees" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý nhân viên</NavLink></li>
-            <li><NavLink to="/customers" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý khách hàng</NavLink></li>
-            <li><NavLink to="/rooms" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý phòng</NavLink></li>
-            <li><NavLink to="/room-types" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý kiểu phòng</NavLink></li>
-            <li><NavLink to="/invoices" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý hóa đơn</NavLink></li>
-            <li><NavLink to="/services" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>Quản lý dịch vụ</NavLink></li>
+        <style>{`
+          nav {
+            background-color: #004080;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+          }
+
+          nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+          }
+
+          nav ul li a:hover {
+            text-decoration: underline;
+          }
+
+          nav button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+          }
+
+          h2 {
+            margin-top: 1rem;
+          }
+
+          form div {
+            margin-bottom: 1rem;
+          }
+
+          input, select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            box-sizing: border-box;
+          }
+
+          button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+          }
+
+          table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 1rem auto;
+          }
+
+          table, th, td {
+            border: 1px solid #ccc;
+          }
+
+          th, td {
+            padding: 0.75rem;
+            text-align: left;
+          }
+
+          td button {
+            margin-right: 0.5rem;
+          }
+
+          p {
+            margin: 1rem 0;
+          }
+        `}</style>
+        <nav>
+          <div>Hotel Management</div>
+          <ul>
+            <li><NavLink to="/employees">Quản lý nhân viên</NavLink></li>
+            <li><NavLink to="/customers">Quản lý khách hàng</NavLink></li>
+            <li><NavLink to="/rooms">Quản lý phòng</NavLink></li>
+            <li><NavLink to="/room-types">Quản lý kiểu phòng</NavLink></li>
+            <li><NavLink to="/invoices">Quản lý hóa đơn</NavLink></li>
+            <li><NavLink to="/services">Quản lý dịch vụ</NavLink></li>
           </ul>
-          <div className="navbar-user">
+          <div>
             <span>Xin chào, {userName} ({userRole})</span>
-            <button className="logout-btn" onClick={handleLogout} disabled={loading}>Đăng xuất</button>
+            <button onClick={handleLogout} disabled={loading}>Đăng xuất</button>
           </div>
         </nav>
 
-        <div className="container">
+        <div style={{ padding: '1rem' }} >
           <h2>Quản lý phòng</h2>
-          {message && (<p className={`message ${message.includes('thành công') ? 'success' : 'error'}`}>{message}</p>)}
-          {loading && <div className="loader"></div>}
+          {message && <p>{message}</p>}
+          {loading && <div>Đang tải...</div>}
 
-          <form onSubmit={handleSubmit} className="form">
-            <div className="form-group">
-              <label htmlFor="sku">Mã phòng <span className="required">*</span></label>
+          <form onSubmit={handleSubmit} style={{ maxWidth: '1000px', marginBottom: '2rem' }}>
+            <div>
+              <label htmlFor="sku">Mã phòng *</label>
               <input id="sku" name="sku" placeholder="Mã phòng" value={form.sku} onChange={handleChange} required disabled={loading} />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="typeId">Kiểu phòng <span className="required">*</span></label>
+            <div>
+              <label htmlFor="typeId">Kiểu phòng *</label>
               <select id="typeId" name="typeId" value={form.typeId} onChange={handleChange} required disabled={loading}>
                 <option value={0}>-- Chọn kiểu phòng --</option>
                 {roomTypes.map(rt => (
@@ -184,18 +264,20 @@ const RoomManagement = () => {
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="price">Giá phòng <span className="required">*</span></label>
+            <div>
+              <label htmlFor="price">Giá phòng *</label>
               <input id="price" name="price" type="number" min="0" step="1000" placeholder="Giá phòng" value={form.price} onChange={handleChange} required disabled={loading} />
             </div>
 
             <button type="submit" disabled={loading}>{editingId == null ? 'Tạo phòng' : 'Cập nhật phòng'}</button>
             {editingId != null && (
-                <button type="button" onClick={() => { setEditingId(null); setForm({ sku: '', typeId: 0, price: '' }); setMessage(''); }} disabled={loading} className="cancel-btn">Hủy</button>
+                <button type="button" onClick={() => { setEditingId(null); setForm({ sku: '', typeId: 0, price: '' }); setMessage(''); }} disabled={loading}>
+                  Hủy
+                </button>
             )}
           </form>
 
-          <table className="room-table">
+          <table>
             <thead>
             <tr>
               <th>Hình ảnh</th>
@@ -208,24 +290,24 @@ const RoomManagement = () => {
             </thead>
             <tbody>
             {rooms.length === 0 ? (
-                <tr><td colSpan={5}>Chưa có phòng nào.</td></tr>
+                <tr><td colSpan={6}>Chưa có phòng nào.</td></tr>
             ) : (
                 rooms.map(room => (
                     <tr key={room.roomId}>
-                           <td>
-                                                <img
-                                                  src={room.imageUrl || 'https://via.placeholder.com/100'}
-                                                  alt="Phòng"
-                                                  style={{ width: '100px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
-                                                />
-                                              </td>
+                      <td>
+                        <img
+                            src={room.imageUrl || 'https://via.placeholder.com/100'}
+                            alt="Phòng"
+                            style={{ width: '100px', height: '80px', objectFit: 'cover' }}
+                        />
+                      </td>
                       <td>{room.sku}</td>
                       <td>{room.typeName}</td>
                       <td>{room.price.toLocaleString('vi-VN')} VNĐ</td>
                       <td>{room.status}</td>
                       <td>
                         <button onClick={() => handleEdit(room)} disabled={loading}>Sửa</button>
-                        <button onClick={() => handleDelete(room.roomId)} disabled={loading} className="delete-btn">Xóa</button>
+                        <button onClick={() => handleDelete(room.roomId)} disabled={loading}>Xóa</button>
                       </td>
                     </tr>
                 ))

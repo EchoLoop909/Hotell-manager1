@@ -20,20 +20,20 @@ function CustomerUpdate() {
     }
 
     axios
-      .get("http://localhost:8888/api/v1/customers/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setCustomer(res.data);
-        setForm({
-          name: res.data.name || "",
-          email: res.data.email || "",
-          phone: res.data.phone || "",
-          password: "", // không hiện mật khẩu cũ, để trống để nhập mới
-        });
-        setError(null);
-      })
-      .catch(() => setError("Lấy thông tin khách hàng thất bại"));
+        .get("http://localhost:8888/api/v1/customers/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setCustomer(res.data);
+          setForm({
+            name: res.data.name || "",
+            email: res.data.email || "",
+            phone: res.data.phone || "",
+            password: "",
+          });
+          setError(null);
+        })
+        .catch(() => setError("Lấy thông tin khách hàng thất bại"));
   }, []);
 
   const handleChange = (e) => {
@@ -56,91 +56,84 @@ function CustomerUpdate() {
       return;
     }
 
-    // Chuẩn bị payload gửi đi
     const payload = {
       name: form.name,
       email: form.email,
       phone: form.phone,
-      // Chỉ thêm password nếu có nhập
       ...(form.password.trim() !== "" && { password: form.password }),
     };
 
     axios
-      .put(`http://localhost:8888/api/v1/customers/${customer.customerId}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(() => {
-        setSuccessMsg("Cập nhật thông tin thành công!");
-        setError(null);
-        setForm((prev) => ({ ...prev, password: "" })); // reset password input
-      })
-      .catch((error) => {
-        console.error(error.response || error.message);
-        setError("Cập nhật thông tin thất bại");
-      });
+        .put(`http://localhost:8888/api/v1/customers/${customer.customerId}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then(() => {
+          setSuccessMsg("Cập nhật thông tin thành công!");
+          setError(null);
+          setForm((prev) => ({ ...prev, password: "" }));
+        })
+        .catch(() => {
+          setError("Cập nhật thông tin thất bại");
+        });
   };
 
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  if (error) return <div>{error}</div>;
   if (!customer) return <div>Đang tải thông tin...</div>;
 
   return (
-    <div>
-      <h2>Chỉnh sửa thông tin khách hàng</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Họ và tên:</label><br />
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <div>
+        <h2>Chỉnh sửa thông tin khách hàng</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Họ và tên:</label><br />
+            <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+            />
+          </div>
 
-        <div>
-          <label>Email:</label><br />
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div>
+            <label>Email:</label><br />
+            <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+            />
+          </div>
 
-        <div>
-          <label>Số điện thoại:</label><br />
-          <input
-            type="text"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <label>Số điện thoại:</label><br />
+            <input
+                type="text"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+            />
+          </div>
 
-        <div>
-          <label>Mật khẩu mới (để trống nếu không đổi):</label><br />
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <label>Mật khẩu mới (để trống nếu không đổi):</label><br />
+            <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+            />
+          </div>
 
-        <button type="submit" style={{ marginTop: "10px" }}>
-          Cập nhật
-        </button>
-      </form>
+          <button type="submit">Cập nhật</button>
+        </form>
 
-      {successMsg && (
-        <div style={{ color: "green", marginTop: "10px" }}>{successMsg}</div>
-      )}
-    </div>
+        {successMsg && <div>{successMsg}</div>}
+      </div>
   );
 }
 
