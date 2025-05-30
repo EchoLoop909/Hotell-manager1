@@ -177,7 +177,7 @@ const App = () => {
               }
           />
           <Route
-              path="/receptionist/custommer"
+              path="/receptionist/customer"
               element={
                   <ProtectedRoute allowedRoles={['LE_TAN']}>
                       <CustomerManagementEmployee />

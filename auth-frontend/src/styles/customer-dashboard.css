@@ -1,0 +1,136 @@
+/* Wrapper */
+.dashboard-wrapper {
+    min-height: 100vh;
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007bff; /* Xanh dương cho khách hàng */
+    padding: 12px 20px;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-list li {
+    margin: 0 12px;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 6px 12px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #0056b3;
+    border-radius: 4px;
+}
+
+.nav-link.active {
+    background-color: #0056b3;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+.logout-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Main Container */
+.dashboard-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 24px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Title */
+.title {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+/* Welcome Message */
+.welcome-message {
+    margin-top: 16px;
+}
+
+.welcome-message h2 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.welcome-message p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .nav-list {
+        flex-direction: column;
+        align-items: center;
+    }
+    .nav-list li {
+        margin: 8px 0;
+    }
+    .dashboard-container {
+        margin: 12px;
+        padding: 16px;
+    }
+    .title {
+        font-size: 1.5em;
+    }
+    .welcome-message h2 {
+        font-size: 1.2em;
+    }
+}
