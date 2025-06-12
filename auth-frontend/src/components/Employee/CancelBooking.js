@@ -87,7 +87,7 @@ const CancelBooking = () => {
         setError(null);
 
         if (!bookingId) {
-            setError('Vui lòng nhập ID booking');
+            setError('Vui lòng nhập tên phòng cần hủy');
             return;
         }
 
@@ -173,14 +173,6 @@ const CancelBooking = () => {
                             Cập nhật thông tin
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink
-                            to="/receptionist"
-                            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                        >
-                            Quay lại Dashboard
-                        </NavLink>
-                    </li>
                 </ul>
                 <div className="navbar-user">
                     <span>Xin chào, {userName} ({userRole})</span>
@@ -194,7 +186,7 @@ const CancelBooking = () => {
                 <h1 className="title">Hủy đặt phòng</h1>
                 <form onSubmit={handleCancel} className="cancel-form">
                     <div className="form-group">
-                        <label htmlFor="bookingId">Nhập ID booking cần hủy</label>
+                        <label htmlFor="bookingId">Nhập tên phòng cần hủy</label>
                         <input
                             type="number"
                             id="bookingId"

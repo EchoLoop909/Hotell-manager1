@@ -316,14 +316,6 @@ function EmployeeUpdate() {
                             Cập nhật thông tin
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink
-                            to="/receptionist"
-                            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-                        >
-                            Quay lại Dashboard
-                        </NavLink>
-                    </li>
                 </ul>
                 <div className="navbar-user">
                     <span>Xin chào, {userName} ({userRole})</span>
@@ -374,23 +366,6 @@ function EmployeeUpdate() {
                             onChange={handleChange}
                             className="form-input"
                         />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="employee_role">
-                            Vai trò <span className="required">*</span>
-                        </label>
-                        <select
-                            id="employee_role"
-                            name="employee_role"
-                            value={form.employee_role}
-                            onChange={handleChange}
-                            className="form-input"
-                            required
-                        >
-                            <option value="">-- Chọn vai trò --</option>
-                            <option value="QUAN_LY">Quản lý</option>
-                            <option value="LE_TAN">Lễ tân</option>
-                        </select>
                     </div>
                     <button type="submit" className="submit-btn">
                         Cập nhật

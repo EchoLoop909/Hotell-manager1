@@ -4,6 +4,18 @@
     background-color: #f4f6f9;
     font-family: Arial, sans-serif;
 }
+/* Wrapper */
+.dashboard-wrapper {
+    min-height: 100vh;
+    background-color: #f4f6f9;
+
+    /* Thêm vào để căn giữa theo cả trục X và Y */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Đề phòng bị quá sát viền màn hình */
+    box-sizing: border-box;
+}
 
 /* Navbar */
 .navbar {

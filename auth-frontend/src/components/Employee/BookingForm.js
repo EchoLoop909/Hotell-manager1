@@ -581,14 +581,6 @@ const BookingForm = () => {
                 Cập nhật thông tin
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                  to="/receptionist"
-                  className={({ isActive }) => (isActive ? 'nav-link' : 'active')}
-              >
-                Quay lại Dashboard
-              </NavLink>
-            </li>
           </ul>
           <div className="navbar-user">
             <span>Xinchào, userName ({userRole})</span>

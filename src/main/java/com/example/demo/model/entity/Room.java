@@ -30,7 +30,7 @@ public class Room {
     @Column(nullable = false, columnDefinition = "ENUM('trống', 'đã_đặt', 'đang_dọn') DEFAULT 'trống'")
     private RoomStatus status;
 
-    @Column(nullable = false)
-    private String name;
+//    @Column(nullable = false)
+//    private String name;
 
 }

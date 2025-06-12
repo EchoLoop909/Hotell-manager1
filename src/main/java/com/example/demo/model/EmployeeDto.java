@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor          // sinh constructor không-arg cho Jackson
-@AllArgsConstructor         // sinh constructor tất cả các trường (nếu bạn cần)
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeDto {
     @JsonProperty("id")
-    private Integer employeeId;   // thêm trường này
+    private Integer employeeId;
     private String name;
     private String email;
     private String password;

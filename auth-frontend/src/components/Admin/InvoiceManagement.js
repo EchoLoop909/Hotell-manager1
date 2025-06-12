@@ -176,12 +176,12 @@ const InvoiceManagement = () => {
 
           <form onSubmit={handleSubmit}>
             <div>
-              <label>Booking ID *</label>
+              <label>Tên phòng *</label>
               <input name="bookingId" type="number" value={form.bookingId} onChange={handleChange} required min={1} />
             </div>
             <div>
-              <label>Service ID *</label>
-              <input name="serviceId" type="number" value={form.serviceId} onChange={handleChange} required min={1} />
+              <label>Tên dịch vụ *</label>
+              <input name="serviceId" type="number" value={form.name} onChange={handleChange} required min={1} />
             </div>
             <div>
               <label>Phương thức thanh toán</label>
@@ -200,7 +200,7 @@ const InvoiceManagement = () => {
               </select>
             </div>
             <div>
-              <label>Ngày thanh toán</label>
+              <label>Ngày Tạo hóa đơn</label>
               <input name="paymentDate" type="datetime-local" value={form.paymentDate} onChange={handleChange} />
             </div>
 
@@ -215,7 +215,7 @@ const InvoiceManagement = () => {
           <table>
             <thead>
             <tr>
-              <th>Booking ID</th><th>Service ID</th><th>Phương thức thanh toán</th><th>Trạng thái</th><th>Ngày thanh toán</th><th>Tổng tiền</th><th>Hành động</th>
+              <th>Booking ID</th><th>Service ID</th><th>Phương thức thanh toán</th><th>Trạng thái</th><th>Ngày tạo hóa đơn</th><th>Tổng tiền</th><th>Hành động</th>
             </tr>
             </thead>
             <tbody>
@@ -225,7 +225,7 @@ const InvoiceManagement = () => {
                 invoices.map(inv => (
                     <tr key={inv.invoiceId}>
                       <td>{inv.bookingId}</td>
-                      <td>{inv.serviceId}</td>
+                      <td>{inv.invoiceId}</td>
                       <td>{inv.paymentMethod}</td>
                       <td>{inv.status}</td>
                       <td>{inv.paymentDate ? new Date(inv.paymentDate).toLocaleString() : ''}</td>

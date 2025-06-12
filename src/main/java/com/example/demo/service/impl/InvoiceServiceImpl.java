@@ -368,7 +368,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (inv.getBooking() != null && inv.getBooking().getRoom() != null) {
             Room room = inv.getBooking().getRoom();
             dto.setRoomSku(room.getSku());
-            dto.setRoomName(room.getName());
             if (room.getType() != null) {
                 dto.setRoomTypeName(room.getType().getName());
             }

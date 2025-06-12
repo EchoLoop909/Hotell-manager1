@@ -266,14 +266,6 @@ const ReceptionistSearchRoom = () => {
                 Cập nhật thông tin
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                  to="/receptionist"
-                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-              >
-                Quay lại Dashboard
-              </NavLink>
-            </li>
           </ul>
           <div className="navbar-user">
             <span>Xin chào, {userName} ({userRole})</span>

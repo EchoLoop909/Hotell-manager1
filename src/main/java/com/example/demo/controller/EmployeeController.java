@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(
         path = "/api/v1/employees",
-        produces = MediaType.APPLICATION_JSON_VALUE    // tất cả trả về JSON
+        produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor
 public class EmployeeController {

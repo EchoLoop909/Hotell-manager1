@@ -78,7 +78,7 @@ const RoomManagement = () => {
     setMessage('');
     try {
       if (editingId == null) {
-        await api.post('/rooms/create', {
+        await api.post('/rooms/new', {
           sku: form.sku.trim(),
           typeId: form.typeId,
           price: Number(form.price),
