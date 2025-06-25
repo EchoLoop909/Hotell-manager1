@@ -139,7 +139,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         InvoiceDto dto = new InvoiceDto();
         dto.setInvoiceId(inv.getInvoiceId());
         dto.setBookingId(inv.getBooking().getBookingId());
-        dto.setServiceId(inv.getService().getServiceId());
+//        dto.setServiceId(inv.getService().getServiceId());
+        dto.setServiceId(inv.getService() != null ? inv.getService().getServiceId() : null);
+
         dto.setTotalAmount(inv.getTotalAmount());
         dto.setPaymentMethod(inv.getPaymentMethod().name());
         dto.setStatus(inv.getStatus().name());
@@ -383,4 +385,3 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
 }
-
